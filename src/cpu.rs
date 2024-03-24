@@ -1,6 +1,7 @@
 #![allow(unused_variables)]
 pub struct Cpu {
     pub register_a: u8,
+    pub register_x: u8,
     pub status: u8,
     pub program_counter: u16,
 }
@@ -9,6 +10,7 @@ impl Cpu {
     pub fn new() -> Self {
         Cpu {
             register_a: 0,
+            register_x: 0,
             status: 0,
             program_counter: 0,
         }
@@ -21,29 +23,46 @@ impl Cpu {
         loop {
             let operation_code = self.get_next_byte_and_update_program_counter(&program);
             match operation_code {
-                0xA9 => {
-                    let param = self.get_next_byte_and_update_program_counter(&program);
-                    if self.program_counter as usize == program.len() {
-                        panic!("wrong argument for load accumulator")
-                    }
-                    self.register_a = param;
-                    
-                    if self.register_a == 0 {
-                        self.status = self.status | 0b0000_0010;
-                    } else {
-                        self.status = self.status & 0b1111_1101;
-                    }
-    
-                    if self.register_a & 0b1000_0000 != 0 {
-                        self.status = self.status | 0b1000_0000;
-                    } else {
-                        self.status = self.status & 0b0111_1111;
-                    }
-
-                }
+                0xA9 => self.lda(&program),
+                0xAA => self.tax(&program),
                 0x00 => return,
                 _ => todo!(),
             }
+        }
+    }
+
+    fn lda(&mut self, program: &Vec<u8>) {
+        let param = self.get_next_byte_and_update_program_counter(program);
+        if self.program_counter as usize == program.len() {
+            panic!("wrong argument for load accumulator")
+        }
+        self.register_a = param;
+
+        if self.register_a == 0 {
+            self.status = self.status | 0b0000_0010;
+        } else {
+            self.status = self.status & 0b1111_1101;
+        }
+
+        if self.register_a & 0b1000_0000 != 0 {
+            self.status = self.status | 0b1000_0000;
+        } else {
+            self.status = self.status & 0b0111_1111;
+        }
+    }
+
+    fn tax(&mut self, program: &Vec<u8>) {
+        self.register_x = self.register_a;
+        if self.register_x == 0 {
+            self.status = self.status | 0b0000_0010;
+        } else {
+            self.status = self.status & 0b1111_1101;
+        }
+
+        if self.register_x & 0b1000_0000 != 0 {
+            self.status = self.status | 0b1000_0000;
+        } else {
+            self.status = self.status & 0b0111_1111;
         }
     }
 
@@ -91,56 +110,86 @@ mod tests {
     }
 
     #[test]
-    fn lda_param_is_loaded_to_register_a(){
+    fn lda_param_is_loaded_to_register_a() {
         let mut cpu = Cpu::new();
         cpu.interpret(vec![0xA9, 0x11, 0x00]);
-        assert_eq!(cpu.register_a,0x11);
+        assert_eq!(cpu.register_a, 0x11);
         assert_eq!(cpu.program_counter, 3);
     }
 
     #[test]
     #[should_panic(expected = "wrong argument for load accumulator")]
-    fn lda_param_argument_wrong(){
+    fn lda_param_argument_wrong() {
         let mut cpu = Cpu::new();
         cpu.interpret(vec![0xA9, 0x00]);
     }
 
     #[test]
-    fn lda_param_is_0_zero_flag_is_set(){
+    fn lda_param_is_0_zero_flag_is_set() {
         let mut cpu = Cpu::new();
-        cpu.interpret(vec![0xA9,0x00, 0x00]);
-        assert_eq!(cpu.register_a,0x00);
+        cpu.interpret(vec![0xA9, 0x00, 0x00]);
+        assert_eq!(cpu.register_a, 0x00);
         assert_eq!(cpu.program_counter, 3);
-        assert_eq!(cpu.status, 0b0000_0010)
+        assert_eq!(cpu.status, 0b0000_0010);
     }
 
     #[test]
-    fn lda_param_is_0_zero_flag_is_set_without_affecting_other_flags(){
+    fn lda_param_is_0_zero_flag_is_set_without_affecting_other_flags() {
         let mut cpu = Cpu::new();
         cpu.status = 0b0110_1101;
-        cpu.interpret(vec![0xA9,0x00, 0x00]);
-        assert_eq!(cpu.register_a,0x00);
+        cpu.interpret(vec![0xA9, 0x00, 0x00]);
+        assert_eq!(cpu.register_a, 0x00);
         assert_eq!(cpu.program_counter, 3);
-        assert_eq!(cpu.status, 0b0110_1111)
+        assert_eq!(cpu.status, 0b0110_1111);
     }
 
     #[test]
-    fn lda_param_is_negative_negative_flag_is_set(){
+    fn lda_param_is_negative_negative_flag_is_set() {
         let mut cpu = Cpu::new();
-        cpu.interpret(vec![0xA9,0xA0, 0x00]);
-        assert_eq!(cpu.register_a,0xA0);
+        cpu.interpret(vec![0xA9, 0xA0, 0x00]);
+        assert_eq!(cpu.register_a, 0xA0);
         assert_eq!(cpu.program_counter, 3);
-        assert_eq!(cpu.status, 0b1000_0000)
+        assert_eq!(cpu.status, 0b1000_0000);
     }
 
     #[test]
-    fn lda_param_is_negative_negative_flag_is_set_without_affecting_other_flags(){
+    fn lda_param_is_negative_negative_flag_is_set_without_affecting_other_flags() {
         let mut cpu = Cpu::new();
-        cpu.status
-        cpu.interpret(vec![0xA9,0xA0, 0x00]);
-        assert_eq!(cpu.register_a,0xA0);
+        cpu.status = 0b0110_1111;
+        cpu.interpret(vec![0xA9, 0xA0, 0x00]);
+        assert_eq!(cpu.register_a, 0xA0);
         assert_eq!(cpu.program_counter, 3);
-        assert_eq!(cpu.status, 0b1000_0000)
+        assert_eq!(cpu.status, 0b1110_1101);
     }
 
+    #[test]
+    fn tax_moves_accumulator_to_register_x() {
+        let mut cpu = Cpu::new();
+        cpu.interpret(vec![0xA9, 0x11, 0xAA, 0x00]);
+        assert_eq!(cpu.register_a, 0x11);
+        assert_eq!(cpu.register_x, 0x11);
+        assert_eq!(cpu.program_counter, 4);
+    }
+
+    #[test]
+    fn tax_accumalator_value_is_0_zero_flag_is_set_without_affecting_other_flags() {
+        let mut cpu = Cpu::new();
+        cpu.status = 0b0110_1101;
+        cpu.interpret(vec![0xA9, 0x00, 0xAA, 0x00]);
+        assert_eq!(cpu.register_a, 0x00);
+        assert_eq!(cpu.register_x, 0x00);
+        assert_eq!(cpu.program_counter, 4);
+        assert_eq!(cpu.status, 0b0110_1111);
+    }
+
+    #[test]
+    fn tax_accumalator_value_is_negative_negative_flag_is_set_without_affecting_other_flags() {
+        let mut cpu = Cpu::new();
+        cpu.status = 0b0110_1111;
+        cpu.interpret(vec![0xA9, 0xA0, 0xAA, 0x00]);
+        assert_eq!(cpu.register_a, 0xA0);
+        assert_eq!(cpu.register_x, 0xA0);
+        assert_eq!(cpu.program_counter, 4);
+        assert_eq!(cpu.status, 0b1110_1101);
+    }
 }
