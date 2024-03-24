@@ -24,11 +24,17 @@ impl Cpu {
             let operation_code = self.get_next_byte_and_update_program_counter(&program);
             match operation_code {
                 0xA9 => self.lda(&program),
-                0xAA => self.tax(&program),
+                0xAA => self.tax(),
                 0x00 => return,
                 _ => todo!(),
             }
         }
+    }
+
+    fn get_next_byte_and_update_program_counter(&mut self, program: &Vec<u8>) -> u8 {
+        let byte_code = program[self.program_counter as usize];
+        self.program_counter += 1;
+        byte_code
     }
 
     fn lda(&mut self, program: &Vec<u8>) {
@@ -37,39 +43,26 @@ impl Cpu {
             panic!("wrong argument for load accumulator")
         }
         self.register_a = param;
-
-        if self.register_a == 0 {
-            self.status = self.status | 0b0000_0010;
-        } else {
-            self.status = self.status & 0b1111_1101;
-        }
-
-        if self.register_a & 0b1000_0000 != 0 {
-            self.status = self.status | 0b1000_0000;
-        } else {
-            self.status = self.status & 0b0111_1111;
-        }
+        self.update_zero_and_negative_flags(self.register_a);
     }
 
-    fn tax(&mut self, program: &Vec<u8>) {
+    fn tax(&mut self) {
         self.register_x = self.register_a;
-        if self.register_x == 0 {
+        self.update_zero_and_negative_flags(self.register_x);
+    }
+
+    fn update_zero_and_negative_flags(&mut self, result: u8) {
+        if result == 0 {
             self.status = self.status | 0b0000_0010;
         } else {
             self.status = self.status & 0b1111_1101;
         }
 
-        if self.register_x & 0b1000_0000 != 0 {
+        if result & 0b1000_0000 != 0 {
             self.status = self.status | 0b1000_0000;
         } else {
             self.status = self.status & 0b0111_1111;
         }
-    }
-
-    fn get_next_byte_and_update_program_counter(&mut self, program: &Vec<u8>) -> u8 {
-        let byte_code = program[self.program_counter as usize];
-        self.program_counter += 1;
-        byte_code
     }
 }
 
