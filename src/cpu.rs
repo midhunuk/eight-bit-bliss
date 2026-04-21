@@ -7,6 +7,12 @@ pub struct Cpu {
     memory: [u8; 0xFFFF],
 }
 
+impl Default for Cpu {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+ 
 impl Cpu {
     pub fn new() -> Self {
         Cpu {
@@ -29,7 +35,7 @@ impl Cpu {
     fn mem_read_u16(&mut self, pos: u16) -> u16 {
         let lower_byte = self.mem_read(pos) as u16;
         let higher_byte = self.mem_read(pos + 1) as u16;
-        (higher_byte << 8) | (lower_byte as u16)
+        (higher_byte << 8) | lower_byte
     }
  
     fn mem_write_u16(&mut self, pos: u16, data: u16) {
@@ -98,20 +104,20 @@ impl Cpu {
 
     fn update_zero_and_negative_flags(&mut self, result: u8) {
         if result == 0 {
-            self.status = self.status | 0b0000_0010;
+            self.status |=  0b0000_0010;
         } else {
-            self.status = self.status & 0b1111_1101;
+            self.status &= 0b1111_1101;
         }
 
         if result & 0b1000_0000 != 0 {
-            self.status = self.status | 0b1000_0000;
+            self.status |= 0b1000_0000;
         } else {
-            self.status = self.status & 0b0111_1111;
+            self.status &= 0b0111_1111;
         }
     }
 }
 
-fn validate_program(program: &Vec<u8>) {
+fn validate_program(program: &[u8]) {
     let program_length = program.len();
     if program_length == 0 {
         panic!("program is empty")
