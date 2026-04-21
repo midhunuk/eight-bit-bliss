@@ -1,0 +1,28 @@
+name: Nightly
+
+on:
+  schedule:
+    - cron: "0 0 * * *"   # daily at midnight UTC
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  nightly:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install nightly toolchain
+        run: rustup toolchain install nightly
+
+      - name: Build (nightly)
+        run: cargo +nightly build --verbose
+
+      - name: Test (nightly)
+        run: cargo +nightly test --verbose
+
+      - name: Clippy
+        run: cargo +nightly clippy -- -D warnings
