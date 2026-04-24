@@ -73,7 +73,7 @@ impl Cpu {
             let code = self.mem_read(self.program_counter);
             let opcode = OPCODES[code as usize]
                 .as_ref()
-                .expect(&format!("Unknown opcode: {:02X}", code));
+                .unwrap_or_else(|| panic!("Unknown opcode: {:02X}", code));
 
             match code {
                 0xA9 => self.lda(&opcode.mode),
@@ -102,30 +102,26 @@ impl Cpu {
 
             AddressingMode::ZeroPage_X => {
                 let pos = self.mem_read(first_operand);
-                let addr = pos.wrapping_add(self.register_x) as u16;
-                addr
+                pos.wrapping_add(self.register_x) as u16
             }
             AddressingMode::ZeroPage_Y => {
                 let pos = self.mem_read(first_operand);
-                let addr = pos.wrapping_add(self.register_y) as u16;
-                addr
+                pos.wrapping_add(self.register_y) as u16
             }
 
             AddressingMode::Absolute_X => {
                 let base = self.mem_read_u16(first_operand);
-                let addr = base.wrapping_add(self.register_x as u16);
-                addr
+                base.wrapping_add(self.register_x as u16)
             }
             AddressingMode::Absolute_Y => {
                 let base = self.mem_read_u16(first_operand);
-                let addr = base.wrapping_add(self.register_y as u16);
-                addr
+                base.wrapping_add(self.register_y as u16)
             }
 
             AddressingMode::Indirect_X => {
                 let base = self.mem_read(first_operand);
 
-                let ptr: u8 = (base as u8).wrapping_add(self.register_x);
+                let ptr: u8 = base.wrapping_add(self.register_x);
                 let lo = self.mem_read(ptr as u16);
                 let hi = self.mem_read(ptr.wrapping_add(1) as u16);
                 (hi as u16) << 8 | (lo as u16)
@@ -134,10 +130,9 @@ impl Cpu {
                 let base = self.mem_read(first_operand);
 
                 let lo = self.mem_read(base as u16);
-                let hi = self.mem_read((base as u8).wrapping_add(1) as u16);
+                let hi = self.mem_read(base.wrapping_add(1) as u16);
                 let deref_base = (hi as u16) << 8 | (lo as u16);
-                let deref = deref_base.wrapping_add(self.register_y as u16);
-                deref
+                deref_base.wrapping_add(self.register_y as u16)
             }
 
             AddressingMode::NoneAddressing => {
