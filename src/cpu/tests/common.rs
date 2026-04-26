@@ -1,0 +1,2 @@
+
+pub const PROGRAM_START_VALUE: u16 = 0x8000;
