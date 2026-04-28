@@ -5,7 +5,9 @@ mod lda {
     #[test]
     fn lda_immediate_param_is_loaded_to_register_a() {
         let mut cpu = set_up_cpu();
+
         cpu.load_and_run(vec![0xA9, 0x11, 0x00]);
+
         assert_eq!(cpu.register_a, 0x11);
         assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 3);
     }
@@ -13,26 +15,45 @@ mod lda {
     #[test]
     fn lda_param_is_0_zero_flag_is_set() {
         let mut cpu = set_up_cpu();
+
         cpu.load_and_run(vec![0xA9, 0x00, 0x00]);
+
         assert_eq!(cpu.register_a, 0x00);
-        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 3);
         assert_eq!(cpu.status, 0b0000_0010);
     }
 
     #[test]
     fn lda_param_is_negative_negative_flag_is_set() {
         let mut cpu = set_up_cpu();
+
         cpu.load_and_run(vec![0xA9, 0xA0, 0x00]);
+
         assert_eq!(cpu.register_a, 0xA0);
-        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 3);
         assert_eq!(cpu.status, 0b1000_0000);
     }
 
     #[test]
     fn lda_zero_page_param_is_loaded_to_register_a() {
         let mut cpu = set_up_cpu();
+
         cpu.mem_write(0x11, 0xff);
+
         cpu.load_and_run(vec![0xA5, 0x11, 0x00]);
+
+        assert_eq!(cpu.register_a, 0xff);
+        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 3);
+    }
+
+    #[test]
+    fn lda_zero_page_x_param_is_loaded_to_register_a() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x11 + 0x05, 0xff);
+
+        cpu.load_and_reset(vec![0xB5, 0x11, 0x00]);
+        cpu.register_x = 0x05;
+
+        cpu.run();
+
         assert_eq!(cpu.register_a, 0xff);
         assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 3);
     }
@@ -41,9 +62,71 @@ mod lda {
     fn lda_absolute_param_is_loaded_to_register_a() {
         let mut cpu = set_up_cpu();
         cpu.mem_write(0x1234, 0xaa);
+
         cpu.load_and_run(vec![0xAD, 0x34, 0x12, 0x00]);
+
         assert_eq!(cpu.register_a, 0xaa);
         assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 4);
+    }
+
+    #[test]
+    fn lda_absolute_x_param_is_loaded_to_register_a() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234 + 0x10, 0xaa);
+
+        cpu.load_and_reset(vec![0xBD, 0x34, 0x12, 0x00]);
+        cpu.register_x = 0x10;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0xaa);
+        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 4);
+    }
+
+    #[test]
+    fn lda_absolute_y_param_is_loaded_to_register_a() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234 + 0x10, 0xaa);
+
+        cpu.load_and_reset(vec![0xB9, 0x34, 0x12, 0x00]);
+        cpu.register_y = 0x10;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0xaa);
+        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 4);
+    }
+
+    #[test]
+    fn lda_indirect_x_param_is_loaded_to_register_a() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234, 0xaa);
+        cpu.mem_write(0x44, 0x34);
+        cpu.mem_write(0x45, 0x12);
+
+        cpu.load_and_reset(vec![0xA1, 0x40, 0x00]);
+        cpu.register_x = 0x04;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0xaa);
+        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 3);
+    }
+
+    #[test]
+    fn lda_indirect_y_param_is_loaded_to_register_a() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234 + 0x04, 0xaa);
+        cpu.mem_write(0x44, 0x34);
+        cpu.mem_write(0x45, 0x12);
+
+        cpu.load_and_reset(vec![0xB1, 0x44, 0x00]);
+        cpu.register_y = 0x04;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0xaa);
+        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 3);
     }
 }
 

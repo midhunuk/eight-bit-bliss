@@ -90,12 +90,12 @@ impl Cpu {
                 .unwrap_or_else(|| panic!("Unknown opcode: {:02X}", code));
 
             match code {
-                0xA9 | 0xA5 | 0xAD
-                     => self.lda(&opcode.mode),
+                0xA9 | 0xA5 | 0xB5 | 0xAD | 0xBD | 0xB9 | 0xA1 | 0xB1
+                     => self.lda(opcode),
                 0xA2 | 0xA6 | 0xB6| 0xAE | 0xBE
-                     => self.ldx(&opcode.mode),
+                     => self.ldx(opcode),
                 0xA0 | 0xA4 | 0xB4| 0xAC | 0xBC
-                     => self.ldy(&opcode.mode),
+                     => self.ldy(opcode),
                 0xAA => self.tax(),
                 0xE8 => self.inx(),
                 0x00 => {
@@ -104,8 +104,6 @@ impl Cpu {
                 }
                 _ => todo!(),
             }
-
-            self.program_counter += opcode.len as u16;
         }
     }
 
@@ -160,35 +158,51 @@ impl Cpu {
         }
     }
 
-    fn lda(&mut self, mode: &AddressingMode) {
-        let addr = self.get_operand_address(mode);
+    fn lda(&mut self, opcode: &OpCode) {
+        let addr = self.get_operand_address(&opcode.mode);
         let value = self.mem_read(addr);
+
         self.register_a = value;
+
         self.update_zero_and_negative_flags(self.register_a);
+
+        self.program_counter += opcode.len as u16;
     }
 
-    fn ldx(&mut self, mode: &AddressingMode) {
-        let addr = self.get_operand_address(mode);
+    fn ldx(&mut self, opcode: &OpCode) {
+        let addr = self.get_operand_address(&opcode.mode);
         let value = self.mem_read(addr);
+
         self.register_x = value;
+
         self.update_zero_and_negative_flags(self.register_x);
+
+        self.program_counter += opcode.len as u16;
+
     }
 
-    fn ldy(&mut self, mode: &AddressingMode) {
-        let addr = self.get_operand_address(mode);
+    fn ldy(&mut self, opcode: &OpCode) {
+        let addr = self.get_operand_address(&opcode.mode);
         let value = self.mem_read(addr);
+
         self.register_y = value;
+
         self.update_zero_and_negative_flags(self.register_y);
+
+        self.program_counter += opcode.len as u16;
     }
 
     fn tax(&mut self) {
         self.register_x = self.register_a;
         self.update_zero_and_negative_flags(self.register_x);
+        self.program_counter += 1;
+
     }
 
     fn inx(&mut self) {
         self.register_x += 1;
         self.update_zero_and_negative_flags(self.register_x);
+        self.program_counter += 1;
     }
 
     fn update_zero_and_negative_flags(&mut self, result: u8) {
