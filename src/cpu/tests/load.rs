@@ -19,7 +19,7 @@ mod lda {
         cpu.load_and_run(vec![0xA9, 0x00, 0x00]);
 
         assert_eq!(cpu.register_a, 0x00);
-        assert_eq!(cpu.status, 0b0000_0010);
+        assert_eq!(cpu.status.bits(), 0b0000_0010);
     }
 
     #[test]
@@ -29,7 +29,7 @@ mod lda {
         cpu.load_and_run(vec![0xA9, 0xA0, 0x00]);
 
         assert_eq!(cpu.register_a, 0xA0);
-        assert_eq!(cpu.status, 0b1000_0000);
+        assert_eq!(cpu.status.bits(), 0b1000_0000);
     }
 
     #[test]
@@ -151,7 +151,7 @@ mod ldx {
         cpu.load_and_run(vec![0xA2, 0x00, 0x00]);
 
         assert_eq!(cpu.register_x, 0x00);
-        assert_eq!(cpu.status, 0b0000_0010);
+        assert_eq!(cpu.status.bits(), 0b0000_0010);
     }
 
     #[test]
@@ -161,7 +161,7 @@ mod ldx {
         cpu.load_and_run(vec![0xA2, 0xA0, 0x00]);
 
         assert_eq!(cpu.register_x, 0xA0);
-        assert_eq!(cpu.status, 0b1000_0000);
+        assert_eq!(cpu.status.bits(), 0b1000_0000);
     }
 
     #[test]
@@ -238,7 +238,7 @@ mod ldy {
         cpu.load_and_run(vec![0xA0, 0x00, 0x00]);
 
         assert_eq!(cpu.register_y, 0x00);
-        assert_eq!(cpu.status, 0b0000_0010);
+        assert_eq!(cpu.status.bits(), 0b0000_0010);
     }
 
     #[test]
@@ -248,7 +248,7 @@ mod ldy {
         cpu.load_and_run(vec![0xA0, 0xA0, 0x00]);
 
         assert_eq!(cpu.register_y, 0xA0);
-        assert_eq!(cpu.status, 0b1000_0000);
+        assert_eq!(cpu.status.bits(), 0b1000_0000);
     }
 
     #[test]

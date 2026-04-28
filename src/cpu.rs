@@ -1,10 +1,35 @@
 use crate::opcodes::*;
+use bitflags::bitflags;
 
+bitflags! {
+    /// # Status Register (P) http://wiki.nesdev.com/w/index.php/Status_flags
+    ///
+    ///  7 6 5 4 3 2 1 0
+    ///  N V _ B D I Z C
+    ///  | |   | | | | +--- Carry Flag
+    ///  | |   | | | +----- Zero Flag
+    ///  | |   | | +------- Interrupt Disable
+    ///  | |   | +--------- Decimal Mode (not used on NES)
+    ///  | |   +----------- Break Command
+    ///  | +--------------- Overflow Flag
+    ///  +----------------- Negative Flag
+    ///
+    pub struct CpuFlags: u8 {
+        const CARRY             = 0b00000001;
+        const ZERO              = 0b00000010;
+        const INTERRUPT_DISABLE = 0b00000100;
+        const DECIMAL_MODE      = 0b00001000;
+        const BREAK             = 0b00010000;
+        const UNUSED            = 0b00100000;
+        const OVERFLOW          = 0b01000000;
+        const NEGATIVE          = 0b10000000;
+    }
+}
 pub struct Cpu {
     pub register_a: u8,
     pub register_x: u8,
     pub register_y: u8,
-    pub status: u8,
+    pub status: CpuFlags,
     pub program_counter: u16,
     memory: [u8; 0xFFFF],
 }
@@ -50,7 +75,7 @@ impl Cpu {
             register_a: 0,
             register_x: 0,
             register_y: 0,
-            status: 0,
+            status: CpuFlags::empty(),
             program_counter: 0,
             memory: [0; 0xFFFF],
         }
@@ -77,7 +102,7 @@ impl Cpu {
         self.register_a = 0;
         self.register_x = 0;
         self.register_y = 0;
-        self.status = 0;
+        self.status = CpuFlags::empty();
 
         self.program_counter = self.mem_read_u16(0xFFFC);
     }
@@ -206,17 +231,40 @@ impl Cpu {
     }
 
     fn update_zero_and_negative_flags(&mut self, result: u8) {
+        self.update_zero_flag(result);
+        self.update_negative_flag(result);
+    }
+    
+    fn update_zero_flag(&mut self, result: u8) {
         if result == 0 {
-            self.status |= 0b0000_0010;
+            self.set_zero_flag();
         } else {
-            self.status &= 0b1111_1101;
+            self.clear_zero_flag();
         }
+    }
 
+    fn update_negative_flag(&mut self, result: u8) {
         if result & 0b1000_0000 != 0 {
-            self.status |= 0b1000_0000;
+            self.set_negative_flag();
         } else {
-            self.status &= 0b0111_1111;
+            self.clear_negative_flag();
         }
+    }
+    
+    fn set_zero_flag(&mut self){
+        self.status.insert(CpuFlags::ZERO);
+    }
+
+    fn clear_zero_flag(&mut self){
+        self.status.remove(CpuFlags::ZERO);
+    }
+
+    fn set_negative_flag(&mut self){
+        self.status.insert(CpuFlags::NEGATIVE);
+    }
+
+    fn clear_negative_flag(&mut self){
+        self.status.remove(CpuFlags::NEGATIVE);
     }
 }
 
