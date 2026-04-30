@@ -115,12 +115,10 @@ impl Cpu {
                 .unwrap_or_else(|| panic!("Unknown opcode: {:02X}", code));
 
             match code {
-                0xA9 | 0xA5 | 0xB5 | 0xAD | 0xBD | 0xB9 | 0xA1 | 0xB1
-                     => self.lda(opcode),
-                0xA2 | 0xA6 | 0xB6| 0xAE | 0xBE
-                     => self.ldx(opcode),
-                0xA0 | 0xA4 | 0xB4| 0xAC | 0xBC
-                     => self.ldy(opcode),
+                0x69 | 0x65 | 0x75 | 0x6D | 0x7D | 0x79 | 0x61 | 0x71 => self.adc(opcode),
+                0xA9 | 0xA5 | 0xB5 | 0xAD | 0xBD | 0xB9 | 0xA1 | 0xB1 => self.lda(opcode),
+                0xA2 | 0xA6 | 0xB6 | 0xAE | 0xBE => self.ldx(opcode),
+                0xA0 | 0xA4 | 0xB4 | 0xAC | 0xBC => self.ldy(opcode),
                 0xAA => self.tax(),
                 0xE8 => self.inx(),
                 0x00 => {
@@ -183,6 +181,38 @@ impl Cpu {
         }
     }
 
+    fn adc(&mut self, opcode: &OpCode) {
+        let addr = self.get_operand_address(&opcode.mode);
+        let memory_value = self.mem_read(addr);
+
+        let sum = self.register_a as u16
+            + memory_value as u16
+            + self.status.contains(CpuFlags::CARRY) as u16;
+
+
+        let carry = sum > 0xff;
+
+        if carry {
+            self.status.insert(CpuFlags::CARRY);
+        } else {
+            self.status.remove(CpuFlags::CARRY);
+        }
+
+         let result = sum as u8;
+
+        if (memory_value ^ result) & (result ^ self.register_a) & 0x80 != 0 {
+            self.status.insert(CpuFlags::OVERFLOW);
+        } else {
+            self.status.remove(CpuFlags::OVERFLOW)
+        }
+
+        self.register_a = result;
+
+        self.update_zero_and_negative_flags(self.register_a);
+
+        self.program_counter += opcode.len as u16;
+    }
+
     fn lda(&mut self, opcode: &OpCode) {
         let addr = self.get_operand_address(&opcode.mode);
         let value = self.mem_read(addr);
@@ -203,7 +233,6 @@ impl Cpu {
         self.update_zero_and_negative_flags(self.register_x);
 
         self.program_counter += opcode.len as u16;
-
     }
 
     fn ldy(&mut self, opcode: &OpCode) {
@@ -221,7 +250,6 @@ impl Cpu {
         self.register_x = self.register_a;
         self.update_zero_and_negative_flags(self.register_x);
         self.program_counter += 1;
-
     }
 
     fn inx(&mut self) {
@@ -234,7 +262,7 @@ impl Cpu {
         self.update_zero_flag(result);
         self.update_negative_flag(result);
     }
-    
+
     fn update_zero_flag(&mut self, result: u8) {
         if result == 0 {
             self.set_zero_flag();
@@ -250,20 +278,20 @@ impl Cpu {
             self.clear_negative_flag();
         }
     }
-    
-    fn set_zero_flag(&mut self){
+
+    fn set_zero_flag(&mut self) {
         self.status.insert(CpuFlags::ZERO);
     }
 
-    fn clear_zero_flag(&mut self){
+    fn clear_zero_flag(&mut self) {
         self.status.remove(CpuFlags::ZERO);
     }
 
-    fn set_negative_flag(&mut self){
+    fn set_negative_flag(&mut self) {
         self.status.insert(CpuFlags::NEGATIVE);
     }
 
-    fn clear_negative_flag(&mut self){
+    fn clear_negative_flag(&mut self) {
         self.status.remove(CpuFlags::NEGATIVE);
     }
 }

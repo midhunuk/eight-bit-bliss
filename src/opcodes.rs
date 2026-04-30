@@ -41,8 +41,19 @@ lazy_static! {
 
         table[0x00] = Some(OpCode::new(0x00, "BRK", 1, 7, AddressingMode::NoneAddressing));
 
+        //arithmetic
+        table[0x69] = Some(OpCode::new(0x69, "ADC", 2, 2, AddressingMode::Immediate));
+        table[0x65] = Some(OpCode::new(0x65, "ADC", 2, 3, AddressingMode::ZeroPage));
+        table[0x75] = Some(OpCode::new(0x75, "ADC", 2, 4, AddressingMode::ZeroPage_X));
+        table[0x6D] = Some(OpCode::new(0x6D, "ADC", 3, 4, AddressingMode::Absolute));
+        table[0x7D] = Some(OpCode::new(0x7D, "ADC", 3, 4 + 1, AddressingMode::Absolute_X));
+        table[0x79] = Some(OpCode::new(0x79, "ADC", 3, 4 + 1, AddressingMode::Absolute_Y));
+        table[0x61] = Some(OpCode::new(0x61, "ADC", 2, 6, AddressingMode::Indirect_X));
+        table[0x71] = Some(OpCode::new(0x71, "ADC", 2, 5 + 1, AddressingMode::Indirect_Y));
+
         table[0xe8] = Some(OpCode::new(0xE8, "INX", 1, 2, AddressingMode::NoneAddressing));
 
+        //load
         table[0xA9] = Some(OpCode::new(0xA9, "LDA", 2, 2, AddressingMode::Immediate));
         table[0xA5] = Some(OpCode::new(0xA5, "LDA", 2, 3, AddressingMode::ZeroPage));
         table[0xB5] = Some(OpCode::new(0xB5, "LDA", 2, 4, AddressingMode::ZeroPage_X));
