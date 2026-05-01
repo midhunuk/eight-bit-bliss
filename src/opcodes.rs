@@ -51,6 +51,15 @@ lazy_static! {
         table[0x61] = Some(OpCode::new(0x61, "ADC", 2, 6, AddressingMode::Indirect_X));
         table[0x71] = Some(OpCode::new(0x71, "ADC", 2, 5 + 1, AddressingMode::Indirect_Y));
 
+        table[0x29] = Some(OpCode::new(0x29, "AND", 2, 2, AddressingMode::Immediate));
+        table[0x25] = Some(OpCode::new(0x25, "AND", 2, 3, AddressingMode::ZeroPage));
+        table[0x35] = Some(OpCode::new(0x35, "AND", 2, 4, AddressingMode::ZeroPage_X));
+        table[0x2D] = Some(OpCode::new(0x2D, "AND", 3, 4, AddressingMode::Absolute));
+        table[0x3D] = Some(OpCode::new(0x3D, "AND", 3, 4 + 1, AddressingMode::Absolute_X));
+        table[0x39] = Some(OpCode::new(0x39, "AND", 3, 4 + 1, AddressingMode::Absolute_Y));
+        table[0x21] = Some(OpCode::new(0x21, "AND", 2, 6, AddressingMode::Indirect_X));
+        table[0x31] = Some(OpCode::new(0x31, "AND", 2, 5 + 1, AddressingMode::Indirect_Y));
+
         table[0xe8] = Some(OpCode::new(0xE8, "INX", 1, 2, AddressingMode::NoneAddressing));
 
         //load

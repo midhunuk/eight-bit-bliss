@@ -118,6 +118,7 @@ impl Cpu {
 
             match code {
                 0x69 | 0x65 | 0x75 | 0x6D | 0x7D | 0x79 | 0x61 | 0x71 => self.adc(opcode),
+                0x29 | 0x25 | 0x35 | 0x2D | 0x3D | 0x39 | 0x21 | 0x31 => self.and(opcode),
                 0xA9 | 0xA5 | 0xB5 | 0xAD | 0xBD | 0xB9 | 0xA1 | 0xB1 => self.lda(opcode),
                 0xA2 | 0xA6 | 0xB6 | 0xAE | 0xBE => self.ldx(opcode),
                 0xA0 | 0xA4 | 0xB4 | 0xAC | 0xBC => self.ldy(opcode),
@@ -205,6 +206,17 @@ impl Cpu {
         }
 
         self.register_a = result;
+
+        self.update_zero_and_negative_flags(self.register_a);
+
+        self.program_counter += (opcode.len - 1) as u16;
+    }
+
+    fn and(&mut self, opcode: &OpCode) {
+        let addr = self.get_operand_address(&opcode.mode);
+        let value = self.mem_read(addr);
+
+        self.register_a &= value;
 
         self.update_zero_and_negative_flags(self.register_a);
 

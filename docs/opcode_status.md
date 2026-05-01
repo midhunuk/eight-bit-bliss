@@ -21,7 +21,7 @@
 | Opcode | Implemented | Tested | Addressing Modes Done |
 |--------|------------|--------|------------------------|
 | ADC | ✅ | ✅ | IMM, ZP, ZP,X, ABS, ABS,X, ABS,Y, IND,X, IND,Y |
-| AND | ❌ | ❌ |  |
+| AND | ✅ | ✅ | IMM, ZP, ZP,X, ABS, ABS,X, ABS,Y, IND,X, IND,Y |
 | ASL | ❌ | ❌ |  |
 | BCC | ❌ | ❌ |  |
 | BCS | ❌ | ❌ |  |
