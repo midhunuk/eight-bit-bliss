@@ -1,60 +1,78 @@
 ## 6502 Opcode Implementation Tracker
 
+### Addressing Mode Abbreviations
+
+| Abbreviation | Name                | Description |
+|--------------|---------------------|-------------|
+| IMM          | Immediate           | Operand is a constant value |
+| ZP           | Zero Page           | Address in first 256 bytes (0x0000–0x00FF) |
+| ZP,X         | Zero Page,X         | Zero page address offset by X register |
+| ZP,Y         | Zero Page,Y         | Zero page address offset by Y register |
+| ABS          | Absolute            | Full 16-bit address |
+| ABS,X        | Absolute,X          | Absolute address offset by X register |
+| ABS,Y        | Absolute,Y          | Absolute address offset by Y register |
+| IND          | Indirect            | Address read from memory (used by JMP) |
+| IND,X        | Indexed Indirect    | Zero page pointer + X, then dereferenced |
+| IND,Y        | Indirect Indexed    | Zero page pointer dereferenced, then + Y |
+| ACC          | Accumulator         | Operation performed on accumulator register |
+| IMP          | Implied             | No operand (implicit in instruction) |
+| REL          | Relative            | Signed offset for branch instructions |
+
 | Opcode | Implemented | Tested | Addressing Modes Done |
 |--------|------------|--------|------------------------|
-| ADC | ✅ | ✅ | All |
+| ADC | ✅ | ✅ | IMM, ZP, ZP,X, ABS, ABS,X, ABS,Y, IND,X, IND,Y |
 | AND | ❌ | ❌ |  |
 | ASL | ❌ | ❌ |  |
-| BCC | ❌ | ❌ | N/A |
-| BCS | ❌ | ❌ | N/A |
-| BEQ | ❌ | ❌ | N/A |
+| BCC | ❌ | ❌ |  |
+| BCS | ❌ | ❌ |  |
+| BEQ | ❌ | ❌ |  |
 | BIT | ❌ | ❌ |  |
-| BMI | ❌ | ❌ | N/A |
-| BNE | ❌ | ❌ | N/A |
-| BPL | ❌ | ❌ | N/A |
-| BRK | ❌ | ❌ | Implied |
-| BVC | ❌ | ❌ | N/A |
-| BVS | ❌ | ❌ | N/A |
-| CLC | ❌ | ❌ | Implied |
-| CLD | ❌ | ❌ | Implied |
-| CLI | ❌ | ❌ | Implied |
-| CLV | ❌ | ❌ | Implied |
+| BMI | ❌ | ❌ |  |
+| BNE | ❌ | ❌ |  |
+| BPL | ❌ | ❌ |  |
+| BRK | ❌ | ❌ |  |
+| BVC | ❌ | ❌ |  |
+| BVS | ❌ | ❌ |  |
+| CLC | ❌ | ❌ |  |
+| CLD | ❌ | ❌ |  |
+| CLI | ❌ | ❌ |  |
+| CLV | ❌ | ❌ |  |
 | CMP | ❌ | ❌ |  |
 | CPX | ❌ | ❌ |  |
 | CPY | ❌ | ❌ |  |
 | DEC | ❌ | ❌ |  |
-| DEX | ❌ | ❌ | Implied |
-| DEY | ❌ | ❌ | Implied |
+| DEX | ❌ | ❌ |  |
+| DEY | ❌ | ❌ |  |
 | EOR | ❌ | ❌ |  |
-| INC | ✅ | ✅ | All |
-| INX | ❌ | ❌ | Implied |
-| INY | ❌ | ❌ | Implied |
-| JMP | ❌ | ❌ | Absolute, Indirect |
-| JSR | ❌ | ❌ | Absolute |
-| LDA | ✅ | ✅ | All |
-| LDX | ✅ | ✅ | All |
-| LDY | ✅ | ✅ | All |
+| INC | ❌ | ❌ |  |
+| INX | ✅ | ✅ | IMP |
+| INY | ❌ | ❌ |  |
+| JMP | ❌ | ❌ |  |
+| JSR | ❌ | ❌ |  |
+| LDA | ✅ | ✅ | IMM, ZP, ZP,X, ABS, ABS,X, ABS,Y, IND,X, IND,Y |
+| LDX | ✅ | ✅ | IMM, ZP, ZP,Y, ABS, ABS,Y |
+| LDY | ✅ | ✅ | IMM, ZP, ZP,X, ABS, ABS,X |
 | LSR | ❌ | ❌ |  |
-| NOP | ❌ | ❌ | Implied |
+| NOP | ❌ | ❌ |  |
 | ORA | ❌ | ❌ |  |
-| PHA | ❌ | ❌ | Implied |
-| PHP | ❌ | ❌ | Implied |
-| PLA | ❌ | ❌ | Implied |
-| PLP | ❌ | ❌ | Implied |
+| PHA | ❌ | ❌ |  |
+| PHP | ❌ | ❌ |  |
+| PLA | ❌ | ❌ |  |
+| PLP | ❌ | ❌ |  |
 | ROL | ❌ | ❌ |  |
 | ROR | ❌ | ❌ |  |
-| RTI | ❌ | ❌ | Implied |
-| RTS | ❌ | ❌ | Implied |
+| RTI | ❌ | ❌ |  |
+| RTS | ❌ | ❌ |  |
 | SBC | ❌ | ❌ |  |
-| SEC | ❌ | ❌ | Implied |
-| SED | ❌ | ❌ | Implied |
-| SEI | ❌ | ❌ | Implied |
+| SEC | ❌ | ❌ |  |
+| SED | ❌ | ❌ |  |
+| SEI | ❌ | ❌ |  |
 | STA | ❌ | ❌ |  |
 | STX | ❌ | ❌ |  |
 | STY | ❌ | ❌ |  |
-| TAX | ✅ | ✅ | Implied |
-| TAY | ❌ | ❌ | Implied |
-| TSX | ❌ | ❌ | Implied |
-| TXA | ❌ | ❌ | Implied |
-| TXS | ❌ | ❌ | Implied |
-| TYA | ❌ | ❌ | Implied |
+| TAX | ✅ | ✅ | IMP |
+| TAY | ❌ | ❌ |  |
+| TSX | ❌ | ❌ |  |
+| TXA | ❌ | ❌ |  |
+| TXS | ❌ | ❌ |  |
+| TYA | ❌ | ❌ |  |

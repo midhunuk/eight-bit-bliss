@@ -110,6 +110,8 @@ impl Cpu {
     pub fn run(&mut self) {
         loop {
             let code = self.mem_read(self.program_counter);
+            self.program_counter += 1;
+
             let opcode = OPCODES[code as usize]
                 .as_ref()
                 .unwrap_or_else(|| panic!("Unknown opcode: {:02X}", code));
@@ -121,17 +123,14 @@ impl Cpu {
                 0xA0 | 0xA4 | 0xB4 | 0xAC | 0xBC => self.ldy(opcode),
                 0xAA => self.tax(),
                 0xE8 => self.inx(),
-                0x00 => {
-                    self.program_counter += opcode.len as u16;
-                    return;
-                }
+                0x00 => return,
                 _ => todo!(),
             }
         }
     }
 
     fn get_operand_address(&mut self, mode: &AddressingMode) -> u16 {
-        let first_operand = self.program_counter + 1;
+        let first_operand = self.program_counter;
 
         match mode {
             AddressingMode::Immediate => first_operand,
@@ -189,7 +188,6 @@ impl Cpu {
             + memory_value as u16
             + self.status.contains(CpuFlags::CARRY) as u16;
 
-
         let carry = sum > 0xff;
 
         if carry {
@@ -198,7 +196,7 @@ impl Cpu {
             self.status.remove(CpuFlags::CARRY);
         }
 
-         let result = sum as u8;
+        let result = sum as u8;
 
         if (memory_value ^ result) & (result ^ self.register_a) & 0x80 != 0 {
             self.status.insert(CpuFlags::OVERFLOW);
@@ -210,7 +208,7 @@ impl Cpu {
 
         self.update_zero_and_negative_flags(self.register_a);
 
-        self.program_counter += opcode.len as u16;
+        self.program_counter += (opcode.len - 1) as u16;
     }
 
     fn lda(&mut self, opcode: &OpCode) {
@@ -221,7 +219,7 @@ impl Cpu {
 
         self.update_zero_and_negative_flags(self.register_a);
 
-        self.program_counter += opcode.len as u16;
+        self.program_counter += (opcode.len - 1) as u16;
     }
 
     fn ldx(&mut self, opcode: &OpCode) {
@@ -232,7 +230,7 @@ impl Cpu {
 
         self.update_zero_and_negative_flags(self.register_x);
 
-        self.program_counter += opcode.len as u16;
+        self.program_counter += (opcode.len - 1) as u16;
     }
 
     fn ldy(&mut self, opcode: &OpCode) {
@@ -243,19 +241,17 @@ impl Cpu {
 
         self.update_zero_and_negative_flags(self.register_y);
 
-        self.program_counter += opcode.len as u16;
+        self.program_counter += (opcode.len - 1) as u16;
     }
 
     fn tax(&mut self) {
         self.register_x = self.register_a;
         self.update_zero_and_negative_flags(self.register_x);
-        self.program_counter += 1;
     }
 
     fn inx(&mut self) {
         self.register_x += 1;
         self.update_zero_and_negative_flags(self.register_x);
-        self.program_counter += 1;
     }
 
     fn update_zero_and_negative_flags(&mut self, result: u8) {

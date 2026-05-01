@@ -34,6 +34,7 @@ More instructions and system components are actively being developed.
 ### 📊 Opcode Progress
 
 See full tracker: [Opcode Implementation Status](docs/opcode_status.md)
+
 ---
 
 ## 📚 Reference
