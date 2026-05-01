@@ -28,10 +28,12 @@ And of course — it’s also satisfying to see something gradually behave like 
 The project is in its very early stages.
 
 - The CPU emulation has been started  
-- The first opcode has been implemented  
 
 More instructions and system components are actively being developed.
 
+### 📊 Opcode Progress
+
+See full tracker: [Opcode Implementation Status](docs/opcode_status.md)
 ---
 
 ## 📚 Reference
@@ -53,12 +55,6 @@ This project is heavily inspired by:
 
 ---
 
-## ⚠️ Status
-
-This project is currently in early development.  
-Only the initial CPU structure exists, with the first opcode implemented as a starting milestone.
-
----
 
 [![CI](https://github.com/midhunuk/eight-bit-bliss/actions/workflows/ci.yml/badge.svg)](https://github.com/midhunuk/eight-bit-bliss/actions/workflows/ci.yml) [![Nightly](https://github.com/midhunuk/eight-bit-bliss/actions/workflows/Nightly.yml/badge.svg)](https://github.com/midhunuk/eight-bit-bliss/actions/workflows/Nightly.yml)
 
