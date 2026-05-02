@@ -229,10 +229,9 @@ mod adc {
         assert_eq!(cpu.register_a, 0x8A);
         assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 3);
     }
-
 }
 
-mod and{
+mod and {
     use crate::cpu::tests::common::*;
     use crate::cpu::*;
 
@@ -376,5 +375,124 @@ mod and{
         assert_eq!(cpu.register_a, 0x88);
         assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 3);
     }
+}
 
+mod asl {
+    use crate::cpu::tests::common::*;
+    use crate::cpu::*;
+
+    #[test]
+    fn asl_accumulator_basic_shift() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_reset(vec![0x0A, 0x00]);
+        cpu.register_a = 0b0000_0011;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0b0000_0110);
+        assert!(!cpu.status.contains(CpuFlags::CARRY));
+    }
+
+    #[test]
+    fn asl_accumulator_sets_carry() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_reset(vec![0x0A, 0x00]);
+        cpu.register_a = 0b1000_0001;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0b0000_0010);
+        assert!(cpu.status.contains(CpuFlags::CARRY));
+    }
+
+    #[test]
+    fn asl_accumulator_zero_flag() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_reset(vec![0x0A, 0x00]);
+        cpu.register_a = 0b0000_0000;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0);
+        assert!(cpu.status.contains(CpuFlags::ZERO));
+    }
+
+    #[test]
+    fn asl_accumulator_negative_flag() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_reset(vec![0x0A, 0x00]);
+        cpu.register_a = 0b0100_0000;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0b1000_0000);
+        assert!(cpu.status.contains(CpuFlags::NEGATIVE));
+    }
+
+    #[test]
+    fn asl_zeropage_basic() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x10, 0b0000_0011);
+
+        cpu.load_and_run(vec![0x06, 0x10, 0x00]);
+
+        assert_eq!(cpu.mem_read(0x10), 0b0000_0110);
+    }
+
+    #[test]
+    fn asl_zeropage_zero_flag_set() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x10, 0b1000_0000);
+
+        cpu.load_and_run(vec![0x06, 0x10, 0x00]);
+
+        assert_eq!(cpu.mem_read(0x10), 0x00);
+        assert!(cpu.status.contains(CpuFlags::ZERO));
+    }
+
+    #[test]
+    fn asl_zeropage_negative_flag_set() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x10, 0b0100_0000);
+
+        cpu.load_and_run(vec![0x06, 0x10, 0x00]);
+
+        assert_eq!(cpu.mem_read(0x10), 0b1000_0000);
+        assert!(cpu.status.contains(CpuFlags::NEGATIVE));
+    }
+
+    #[test]
+    fn asl_zeropage_x() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x10 + 0x05, 0b0000_0010);
+        cpu.load_and_reset(vec![0x16, 0x10, 0x00]);
+        cpu.register_x = 0x05;
+
+        cpu.run();
+
+        assert_eq!(cpu.mem_read(0x15), 0b0000_0100);
+    }
+
+    #[test]
+    fn asl_absolute() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234, 0b0000_0011);
+
+        cpu.load_and_run(vec![0x0E, 0x34, 0x12, 0x00]);
+
+        assert_eq!(cpu.mem_read(0x1234), 0b0000_0110);
+    }
+
+    #[test]
+    fn asl_absolute_x() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234 + 0x01, 0b0100_0000);
+        cpu.load_and_reset(vec![0x1E, 0x34, 0x12, 0x00]);
+        cpu.register_x = 0x01;
+
+        cpu.run();
+
+        assert_eq!(cpu.mem_read(0x1235), 0b1000_0000);
+        assert!(cpu.status.contains(CpuFlags::NEGATIVE));
+    }
 }

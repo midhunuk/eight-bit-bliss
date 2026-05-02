@@ -119,6 +119,8 @@ impl Cpu {
             match code {
                 0x69 | 0x65 | 0x75 | 0x6D | 0x7D | 0x79 | 0x61 | 0x71 => self.adc(opcode),
                 0x29 | 0x25 | 0x35 | 0x2D | 0x3D | 0x39 | 0x21 | 0x31 => self.and(opcode),
+                0x0A => self.asl_accumalator(),
+                0x06 | 0x16 | 0x0E | 0x1E => self.asl(opcode),
                 0xA9 | 0xA5 | 0xB5 | 0xAD | 0xBD | 0xB9 | 0xA1 | 0xB1 => self.lda(opcode),
                 0xA2 | 0xA6 | 0xB6 | 0xAE | 0xBE => self.ldx(opcode),
                 0xA0 | 0xA4 | 0xB4 | 0xAC | 0xBC => self.ldy(opcode),
@@ -175,7 +177,7 @@ impl Cpu {
                 deref_base.wrapping_add(self.register_y as u16)
             }
 
-            AddressingMode::NoneAddressing => {
+            AddressingMode::NoneAddressing | AddressingMode::Accumulator => {
                 panic!("mode {:?} is not supported", mode);
             }
         }
@@ -192,9 +194,9 @@ impl Cpu {
         let carry = sum > 0xff;
 
         if carry {
-            self.status.insert(CpuFlags::CARRY);
+            self.set_carry_flag();
         } else {
-            self.status.remove(CpuFlags::CARRY);
+            self.clear_carry_flag();
         }
 
         let result = sum as u8;
@@ -219,6 +221,35 @@ impl Cpu {
         self.register_a &= value;
 
         self.update_zero_and_negative_flags(self.register_a);
+
+        self.program_counter += (opcode.len - 1) as u16;
+    }
+
+    fn asl_accumalator(&mut self) {
+        let value = self.register_a;
+        if value >> 7 == 1 {
+            self.set_carry_flag();
+        } else {
+            self.clear_carry_flag();
+        }
+        let result = value << 1;
+        self.register_a = result;
+        self.update_zero_and_negative_flags(result);
+    }
+
+    fn asl(&mut self, opcode: &OpCode) {
+        let addr = self.get_operand_address(&opcode.mode);
+        let value = self.mem_read(addr);
+
+        if value >> 7 == 1 {
+            self.set_carry_flag();
+        } else {
+            self.clear_carry_flag();
+        }
+        let result= value << 1;
+
+        self.mem_write(addr, result);
+        self.update_zero_and_negative_flags(result);
 
         self.program_counter += (opcode.len - 1) as u16;
     }
@@ -295,6 +326,13 @@ impl Cpu {
         self.status.remove(CpuFlags::ZERO);
     }
 
+    fn set_carry_flag(&mut self) {
+        self.status.insert(CpuFlags::CARRY);
+    }
+
+    fn clear_carry_flag(&mut self) {
+        self.status.remove(CpuFlags::CARRY);
+    }
     fn set_negative_flag(&mut self) {
         self.status.insert(CpuFlags::NEGATIVE);
     }
