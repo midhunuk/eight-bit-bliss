@@ -1,116 +1,193 @@
-use crate::cpu::tests::common::*;
-use crate::cpu::*;
+mod branch_common {
 
-#[test]
-fn bcc_condition_not_met_program_counter_not_moved() {
-    let mut cpu = set_up_cpu();
-    cpu.load_and_reset(vec![0x90, 0x20, 0x00]);
-    cpu.status.insert(CpuFlags::CARRY);
+    macro_rules! branch_test_suite {
+        (
+        $opcode:expr,
+        $set_condition:expr,
+        $clear_condition:expr
+    ) => {
+            use crate::cpu::tests::common::*;
+            #[test]
+            fn not_taken_pc() {
+                let mut cpu = set_up_cpu();
+                cpu.load_and_reset(vec![$opcode, 0x20, 0x00]);
 
-    cpu.run();
+                $set_condition(&mut cpu); // condition NOT satisfied
 
-    assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 2 + 1);
+                cpu.run();
+
+                assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 3);
+            }
+
+            #[test]
+            fn taken_forward() {
+                let mut cpu = set_up_cpu();
+                cpu.load_and_reset(vec![$opcode, 0x20, 0x00]);
+
+                $clear_condition(&mut cpu); // condition satisfied
+
+                cpu.run();
+
+                assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 2 + 0x20 + 1);
+            }
+
+            #[test]
+            fn taken_backward() {
+                let mut cpu = set_up_cpu();
+                cpu.load_and_reset(vec![$opcode, 0xE0, 0x00]);
+
+                $clear_condition(&mut cpu);
+
+                cpu.run();
+
+                assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 2 - 0x20 + 1);
+            }
+
+            #[test]
+            fn skip_instruction() {
+                let mut cpu = set_up_cpu();
+
+                cpu.load_and_reset(vec![$opcode, 0x02, 0xA9, 0xFF, 0xA9, 0x42, 0x00]);
+
+                $clear_condition(&mut cpu);
+
+                cpu.run();
+
+                assert_eq!(cpu.register_a, 0x42);
+            }
+
+            #[test]
+            fn not_taken_executes_next() {
+                let mut cpu = set_up_cpu();
+
+                cpu.load_and_reset(vec![$opcode, 0x02, 0xA9, 0x11, 0x00]);
+
+                $set_condition(&mut cpu);
+
+                cpu.run();
+
+                assert_eq!(cpu.register_a, 0x11);
+            }
+
+            #[test]
+            fn zero_offset() {
+                let mut cpu = set_up_cpu();
+
+                cpu.load_and_reset(vec![$opcode, 0x00, 0xA9, 0x99, 0x00]);
+
+                $clear_condition(&mut cpu);
+
+                cpu.run();
+
+                assert_eq!(cpu.register_a, 0x99);
+            }
+
+            #[test]
+            fn max_forward() {
+                let mut cpu = set_up_cpu();
+
+                cpu.load_and_reset(vec![$opcode, 0x7F, 0x00]);
+
+                $clear_condition(&mut cpu);
+
+                cpu.run();
+
+                assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 2 + 0x7F + 1);
+            }
+
+            #[test]
+            fn max_backward() {
+                let mut cpu = set_up_cpu();
+
+                cpu.load_and_reset(vec![$opcode, 0x80, 0x00]);
+
+                $clear_condition(&mut cpu);
+
+                cpu.run();
+
+                assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 2 - 0x80 + 1);
+            }
+        };
+    }
+    pub(crate) use branch_test_suite;
 }
 
-#[test]
-fn bcc_condition_met_program_counter_moved_forward() {
-    let mut cpu = set_up_cpu();
-    cpu.load_and_reset(vec![0x90, 0x20, 0x00]);
-    cpu.status.remove(CpuFlags::CARRY);
-
-    cpu.run();
-
-    assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 2 + 0x20 + 1);
+mod bcc {
+    use super::branch_common::*;
+    use crate::cpu::*;
+    branch_test_suite!(
+        0x90,
+        |cpu: &mut Cpu| cpu.status.insert(CpuFlags::CARRY),
+        |cpu: &mut Cpu| cpu.status.remove(CpuFlags::CARRY)
+    );
 }
 
-#[test]
-fn bcc_condition_met_program_counter_moved_backward() {
-    let mut cpu = set_up_cpu();
-    cpu.load_and_reset(vec![0x90, 0xE0, 0x00]);
-    cpu.status.remove(CpuFlags::CARRY);
-
-    cpu.run();
-
-    assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 2 - 0x20 + 1);
+mod bcs {
+    use super::branch_common::*;
+    use crate::cpu::*;
+    branch_test_suite!(
+        0xB0,
+        |cpu: &mut Cpu| cpu.status.remove(CpuFlags::CARRY),
+        |cpu: &mut Cpu| cpu.status.insert(CpuFlags::CARRY)
+    );
 }
 
-#[test]
-fn bcc_skips_next_instruction_when_taken() {
-    let mut cpu = set_up_cpu();
-
-    cpu.load_and_reset(vec![
-        0x90, 0x02, // BCC +2 (skip LDA)
-        0xA9, 0xFF, // LDA #$FF (should be skipped)
-        0xA9, 0x42, // LDA #$42
-        0x00,
-    ]);
-
-    cpu.status.remove(CpuFlags::CARRY);
-
-    cpu.run();
-
-    assert_eq!(cpu.register_a, 0x42);
+mod beq {
+    use super::branch_common::*;
+    use crate::cpu::*;
+    branch_test_suite!(
+        0xF0,
+        |cpu: &mut Cpu| cpu.status.remove(CpuFlags::ZERO),
+        |cpu: &mut Cpu| cpu.status.insert(CpuFlags::ZERO)
+    );
 }
 
-#[test]
-fn bcc_does_not_branch_when_carry_set() {
-    let mut cpu = set_up_cpu();
-
-    cpu.load_and_reset(vec![
-        0x90, 0x02,
-        0xA9, 0x11,
-        0x00,
-    ]);
-
-    cpu.status.insert(CpuFlags::CARRY);
-
-    cpu.run();
-
-    assert_eq!(cpu.register_a, 0x11);
+mod bne {
+    use super::branch_common::*;
+    use crate::cpu::*;
+    branch_test_suite!(
+        0xD0,
+        |cpu: &mut Cpu| cpu.status.insert(CpuFlags::ZERO),
+        |cpu: &mut Cpu| cpu.status.remove(CpuFlags::ZERO)
+    );
 }
 
-#[test]
-fn bcc_zero_offset_no_jump() {
-    let mut cpu = set_up_cpu();
-
-    cpu.load_and_reset(vec![
-        0x90, 0x00,
-        0xA9, 0x99,
-        0x00,
-    ]);
-
-    cpu.status.remove(CpuFlags::CARRY);
-
-    cpu.run();
-
-    assert_eq!(cpu.register_a, 0x99);
-}
-#[test]
-fn bcc_max_forward_branch() {
-    let mut cpu = set_up_cpu();
-
-    cpu.load_and_reset(vec![
-        0x90, 0x7F, 0x00,
-    ]);
-
-    cpu.status.remove(CpuFlags::CARRY);
-
-    cpu.run();
-
-    assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 2 + 0x7F + 1);
+mod bmi {
+    use super::branch_common::*;
+    use crate::cpu::*;
+    branch_test_suite!(
+        0x30,
+        |cpu: &mut Cpu| cpu.status.remove(CpuFlags::NEGATIVE),
+        |cpu: &mut Cpu| cpu.status.insert(CpuFlags::NEGATIVE)
+    );
 }
 
-#[test]
-fn bcc_max_backward_branch() {
-    let mut cpu = set_up_cpu();
+mod bpl {
+    use super::branch_common::*;
+    use crate::cpu::*;
+    branch_test_suite!(
+        0x10,
+        |cpu: &mut Cpu| cpu.status.insert(CpuFlags::NEGATIVE),
+        |cpu: &mut Cpu| cpu.status.remove(CpuFlags::NEGATIVE)
+    );
+}
 
-    cpu.load_and_reset(vec![
-        0x90, 0x80, 0x00,
-    ]);
+mod bvc {
+    use super::branch_common::*;
+    use crate::cpu::*;
+    branch_test_suite!(
+        0x50,
+        |cpu: &mut Cpu| cpu.status.insert(CpuFlags::OVERFLOW),
+        |cpu: &mut Cpu| cpu.status.remove(CpuFlags::OVERFLOW)
+    );
+}
 
-    cpu.status.remove(CpuFlags::CARRY);
-
-    cpu.run();
-
-    assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 2 - 0x80 + 1);
+mod bvs {
+    use super::branch_common::*;
+    use crate::cpu::*;
+    branch_test_suite!(
+        0x70,
+        |cpu: &mut Cpu| cpu.status.remove(CpuFlags::OVERFLOW),
+        |cpu: &mut Cpu| cpu.status.insert(CpuFlags::OVERFLOW)
+    );
 }

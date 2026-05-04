@@ -24,15 +24,15 @@
 | AND | ✅ | ✅ | IMM, ZP, ZP,X, ABS, ABS,X, ABS,Y, IND,X, IND,Y |
 | ASL | ✅ | ✅ | ACC, ZP, ZP,X, ABS, ABS,X |
 | BCC | ✅ | ✅ | REL |
-| BCS | ❌ | ❌ |  |
-| BEQ | ❌ | ❌ |  |
+| BCS | ✅ | ✅ | REL |
+| BEQ | ✅ | ✅ | REL |
 | BIT | ❌ | ❌ |  |
-| BMI | ❌ | ❌ |  |
-| BNE | ❌ | ❌ |  |
-| BPL | ❌ | ❌ |  |
+| BMI | ✅ | ✅ | REL |
+| BNE | ✅ | ✅ | REL |
+| BPL | ✅ | ✅ | REL |
 | BRK | ❌ | ❌ |  |
-| BVC | ❌ | ❌ |  |
-| BVS | ❌ | ❌ |  |
+| BVC | ✅ | ✅ | REL |
+| BVS | ✅ | ✅ | REL |
 | CLC | ❌ | ❌ |  |
 | CLD | ❌ | ❌ |  |
 | CLI | ❌ | ❌ |  |

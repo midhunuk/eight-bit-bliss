@@ -72,6 +72,13 @@ lazy_static! {
 
         //branch
         table[0x90] = Some(OpCode::new(0x90, "BCC", 2, 2 + 1 + 2, AddressingMode::Relative));
+        table[0xB0] = Some(OpCode::new(0xB0, "BCS", 2, 2 + 1 + 2, AddressingMode::Relative));
+        table[0xF0] = Some(OpCode::new(0xF0, "BEQ", 2, 2 + 1 + 2, AddressingMode::Relative));
+        table[0x30] = Some(OpCode::new(0x30, "BMI", 2, 2 + 1 + 2, AddressingMode::Relative));
+        table[0xD0] = Some(OpCode::new(0xD0, "BNE", 2, 2 + 1 + 2, AddressingMode::Relative));
+        table[0x10] = Some(OpCode::new(0x10, "BPL", 2, 2 + 1 + 2, AddressingMode::Relative));
+        table[0x50] = Some(OpCode::new(0x50, "BVC", 2, 2 + 1 + 2, AddressingMode::Relative));
+        table[0x70] = Some(OpCode::new(0x70, "BVS", 2, 2 + 1 + 2, AddressingMode::Relative));
 
         //load
         table[0xA9] = Some(OpCode::new(0xA9, "LDA", 2, 2, AddressingMode::Immediate));

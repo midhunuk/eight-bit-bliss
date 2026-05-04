@@ -122,6 +122,13 @@ impl Cpu {
                 0x0A => self.asl_accumalator(),
                 0x06 | 0x16 | 0x0E | 0x1E => self.asl(opcode),
                 0x90 => self.bcc(),
+                0xB0 => self.bcs(),
+                0xF0 => self.beq(),
+                0x30 => self.bmi(),
+                0xD0 => self.bne(),
+                0x10 => self.bpl(),
+                0x50 => self.bvc(),
+                0x70 => self.bvs(),
                 0xA9 | 0xA5 | 0xB5 | 0xAD | 0xBD | 0xB9 | 0xA1 | 0xB1 => self.lda(opcode),
                 0xA2 | 0xA6 | 0xB6 | 0xAE | 0xBE => self.ldx(opcode),
                 0xA0 | 0xA4 | 0xB4 | 0xAC | 0xBC => self.ldy(opcode),
@@ -257,6 +264,44 @@ impl Cpu {
 
     fn bcc(&mut self) {
         let condition = !self.status.contains(CpuFlags::CARRY);
+        self.branch(condition);
+    }
+
+    fn bcs(&mut self) {
+        let condition = self.status.contains(CpuFlags::CARRY);
+        self.branch(condition);
+    }
+
+    fn beq(&mut self) {
+        let condition = self.status.contains(CpuFlags::ZERO);
+        self.branch(condition);
+    }
+
+    // fn bit(&mut self) {
+    // }
+
+    fn bmi(&mut self) {
+        let condition = self.status.contains(CpuFlags::NEGATIVE);
+        self.branch(condition);
+    }
+
+    fn bne(&mut self) {
+        let condition = !self.status.contains(CpuFlags::ZERO);
+        self.branch(condition);
+    }
+
+    fn bpl(&mut self) {
+        let condition = !self.status.contains(CpuFlags::NEGATIVE);
+        self.branch(condition);
+    }
+
+    fn bvc(&mut self) {
+        let condition = !self.status.contains(CpuFlags::OVERFLOW);
+        self.branch(condition);
+    }
+
+    fn bvs(&mut self) {
+        let condition = self.status.contains(CpuFlags::OVERFLOW);
         self.branch(condition);
     }
 
