@@ -121,6 +121,7 @@ impl Cpu {
                 0x29 | 0x25 | 0x35 | 0x2D | 0x3D | 0x39 | 0x21 | 0x31 => self.and(opcode),
                 0x0A => self.asl_accumalator(),
                 0x06 | 0x16 | 0x0E | 0x1E => self.asl(opcode),
+                0x90 => self.bcc(),
                 0xA9 | 0xA5 | 0xB5 | 0xAD | 0xBD | 0xB9 | 0xA1 | 0xB1 => self.lda(opcode),
                 0xA2 | 0xA6 | 0xB6 | 0xAE | 0xBE => self.ldx(opcode),
                 0xA0 | 0xA4 | 0xB4 | 0xAC | 0xBC => self.ldy(opcode),
@@ -177,7 +178,7 @@ impl Cpu {
                 deref_base.wrapping_add(self.register_y as u16)
             }
 
-            AddressingMode::NoneAddressing | AddressingMode::Accumulator => {
+            _ => {
                 panic!("mode {:?} is not supported", mode);
             }
         }
@@ -246,12 +247,31 @@ impl Cpu {
         } else {
             self.clear_carry_flag();
         }
-        let result= value << 1;
+        let result = value << 1;
 
         self.mem_write(addr, result);
         self.update_zero_and_negative_flags(result);
 
         self.program_counter += (opcode.len - 1) as u16;
+    }
+
+    fn bcc(&mut self) {
+        let condition = !self.status.contains(CpuFlags::CARRY);
+        self.branch(condition);
+    }
+
+    fn branch(&mut self, condition: bool) {
+        if condition {
+            let jump = self.mem_read(self.program_counter) as i8;
+            self.program_counter = self.program_counter.wrapping_add(1);
+
+            let base = self.program_counter as i16;
+            let jump_addr = base.wrapping_add(jump as i16) as u16;
+            self.program_counter = jump_addr;
+        }
+        else {
+            self.program_counter = self.program_counter.wrapping_add(1);
+        }
     }
 
     fn lda(&mut self, opcode: &OpCode) {

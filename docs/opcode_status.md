@@ -23,7 +23,7 @@
 | ADC | ✅ | ✅ | IMM, ZP, ZP,X, ABS, ABS,X, ABS,Y, IND,X, IND,Y |
 | AND | ✅ | ✅ | IMM, ZP, ZP,X, ABS, ABS,X, ABS,Y, IND,X, IND,Y |
 | ASL | ✅ | ✅ | ACC, ZP, ZP,X, ABS, ABS,X |
-| BCC | ❌ | ❌ |  |
+| BCC | ✅ | ✅ | REL |
 | BCS | ❌ | ❌ |  |
 | BEQ | ❌ | ❌ |  |
 | BIT | ❌ | ❌ |  |

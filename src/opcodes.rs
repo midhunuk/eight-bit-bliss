@@ -13,7 +13,8 @@ pub enum AddressingMode {
    Indirect_X,
    Indirect_Y,
    NoneAddressing, //Implied
-   Accumulator
+   Accumulator,
+   Relative
 }
 
 pub struct OpCode {
@@ -69,6 +70,9 @@ lazy_static! {
 
         table[0xe8] = Some(OpCode::new(0xE8, "INX", 1, 2, AddressingMode::NoneAddressing));
 
+        //branch
+        table[0x90] = Some(OpCode::new(0x90, "BCC", 2, 2 + 1 + 2, AddressingMode::Relative));
+
         //load
         table[0xA9] = Some(OpCode::new(0xA9, "LDA", 2, 2, AddressingMode::Immediate));
         table[0xA5] = Some(OpCode::new(0xA5, "LDA", 2, 3, AddressingMode::ZeroPage));
@@ -91,6 +95,7 @@ lazy_static! {
         table[0xAC] = Some(OpCode::new(0xAC, "LDY", 3, 4, AddressingMode::Absolute));
         table[0xBC] = Some(OpCode::new(0xBC, "LDY", 3, 4 + 1, AddressingMode::Absolute_X));
 
+        //transfer
         table[0xAA] = Some(OpCode::new(0xAA, "TAX", 1, 2, AddressingMode::NoneAddressing));
 
         table
