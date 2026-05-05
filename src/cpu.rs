@@ -129,6 +129,10 @@ impl Cpu {
                 0x10 => self.bpl(),
                 0x50 => self.bvc(),
                 0x70 => self.bvs(),
+                0x18 => self.clc(),
+                0xD8 => self.cld(),
+                0x58 => self.cli(),
+                0xB8 => self.clv(),
                 0xA9 | 0xA5 | 0xB5 | 0xAD | 0xBD | 0xB9 | 0xA1 | 0xB1 => self.lda(opcode),
                 0xA2 | 0xA6 | 0xB6 | 0xAE | 0xBE => self.ldx(opcode),
                 0xA0 | 0xA4 | 0xB4 | 0xAC | 0xBC => self.ldy(opcode),
@@ -319,6 +323,22 @@ impl Cpu {
         }
     }
 
+    fn clc(&mut self){
+        self.status.remove(CpuFlags::CARRY);
+    }
+
+    fn cld(&mut self){
+        self.status.remove(CpuFlags::DECIMAL_MODE);
+    }
+
+    fn cli(&mut self){
+        self.status.remove(CpuFlags::INTERRUPT_DISABLE);
+    }
+
+    fn clv(&mut self){
+        self.status.remove(CpuFlags::OVERFLOW);
+    }
+    
     fn lda(&mut self, opcode: &OpCode) {
         let addr = self.get_operand_address(&opcode.mode);
         let value = self.mem_read(addr);

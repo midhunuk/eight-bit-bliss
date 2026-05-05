@@ -80,6 +80,12 @@ lazy_static! {
         table[0x50] = Some(OpCode::new(0x50, "BVC", 2, 2 + 1 + 2, AddressingMode::Relative));
         table[0x70] = Some(OpCode::new(0x70, "BVS", 2, 2 + 1 + 2, AddressingMode::Relative));
 
+        //clear register
+        table[0x18] = Some(OpCode::new(0x18, "CLC", 1, 2, AddressingMode::NoneAddressing));
+        table[0xD8] = Some(OpCode::new(0xD8, "CLD", 1, 2, AddressingMode::NoneAddressing));
+        table[0x58] = Some(OpCode::new(0x58, "CLI", 1, 2, AddressingMode::NoneAddressing));
+        table[0xB8] = Some(OpCode::new(0xB8, "CLV", 1, 2, AddressingMode::NoneAddressing));
+
         //load
         table[0xA9] = Some(OpCode::new(0xA9, "LDA", 2, 2, AddressingMode::Immediate));
         table[0xA5] = Some(OpCode::new(0xA5, "LDA", 2, 3, AddressingMode::ZeroPage));

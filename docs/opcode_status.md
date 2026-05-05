@@ -33,10 +33,10 @@
 | BRK | ❌ | ❌ |  |
 | BVC | ✅ | ✅ | REL |
 | BVS | ✅ | ✅ | REL |
-| CLC | ❌ | ❌ |  |
-| CLD | ❌ | ❌ |  |
-| CLI | ❌ | ❌ |  |
-| CLV | ❌ | ❌ |  |
+| CLC | ✅ | ✅ | IMP |
+| CLD | ✅ | ✅ | IMP |
+| CLI | ✅ | ✅ | IMP |
+| CLV | ✅ | ✅ | IMP |
 | CMP | ❌ | ❌ |  |
 | CPX | ❌ | ❌ |  |
 | CPY | ❌ | ❌ |  |
