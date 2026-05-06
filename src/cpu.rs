@@ -139,11 +139,13 @@ impl Cpu {
                 0xC6 | 0xD6 | 0xCE | 0xDE  => self.dec(opcode),
                 0xCA => self.dex(),
                 0x88 => self.dey(),
+                0xE6 | 0xF6 | 0xEE | 0xFE  => self.inc(opcode),
+                0xE8 => self.inx(),
+                0xC8 => self.iny(),
                 0xA9 | 0xA5 | 0xB5 | 0xAD | 0xBD | 0xB9 | 0xA1 | 0xB1 => self.lda(opcode),
                 0xA2 | 0xA6 | 0xB6 | 0xAE | 0xBE => self.ldx(opcode),
                 0xA0 | 0xA4 | 0xB4 | 0xAC | 0xBC => self.ldy(opcode),
                 0xAA => self.tax(),
-                0xE8 => self.inx(),
                 0x00 => return,
                 _ => todo!(),
             }
@@ -404,6 +406,28 @@ impl Cpu {
         self.update_zero_and_negative_flags(self.register_y);
     }
 
+    fn inc(&mut self, opcode: &OpCode) {
+        let addr = self.get_operand_address(&opcode.mode);
+        let value = self.mem_read(addr);
+
+        let result = value.wrapping_add(1);
+        self.mem_write(addr, result);
+
+        self.update_zero_and_negative_flags(result);
+
+        self.program_counter += (opcode.len - 1) as u16;
+    }
+
+    fn inx(&mut self) {
+        self.register_x = self.register_x.wrapping_add(1);
+        self.update_zero_and_negative_flags(self.register_x);
+    }
+
+    fn iny(&mut self) {
+        self.register_y = self.register_y.wrapping_add(1);
+        self.update_zero_and_negative_flags(self.register_y);
+    }
+
     fn lda(&mut self, opcode: &OpCode) {
         let addr = self.get_operand_address(&opcode.mode);
         let value = self.mem_read(addr);
@@ -439,11 +463,6 @@ impl Cpu {
 
     fn tax(&mut self) {
         self.register_x = self.register_a;
-        self.update_zero_and_negative_flags(self.register_x);
-    }
-
-    fn inx(&mut self) {
-        self.register_x += 1;
         self.update_zero_and_negative_flags(self.register_x);
     }
 

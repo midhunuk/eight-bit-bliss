@@ -44,9 +44,9 @@
 | DEX | ✅ | ✅ | IMP |
 | DEY | ✅ | ✅ | IMP |
 | EOR | ❌ | ❌ |  |
-| INC | ❌ | ❌ |  |
+| INC | ✅ | ✅ | ZP, ZP,X, ABS, ABS,X |
 | INX | ✅ | ✅ | IMP |
-| INY | ❌ | ❌ |  |
+| INY | ✅ | ✅ | IMP |
 | JMP | ❌ | ❌ |  |
 | JSR | ❌ | ❌ |  |
 | LDA | ✅ | ✅ | IMM, ZP, ZP,X, ABS, ABS,X, ABS,Y, IND,X, IND,Y |

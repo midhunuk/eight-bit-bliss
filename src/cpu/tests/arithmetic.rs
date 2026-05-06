@@ -3,42 +3,70 @@ mod inx {
     use crate::cpu::*;
 
     #[test]
-    fn x_value_incremented_by_1() {
-        let mut cpu = Cpu::new();
+    fn inx_value_incremented_by_1() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_run(vec![0xA2, 0x11, 0xE8, 0x00]);
 
-        cpu.load_and_run(vec![0xA9, 0x11, 0xAA, 0xE8, 0x00]);
-
-        assert_eq!(cpu.register_a, 0x11);
         assert_eq!(cpu.register_x, 0x12);
-        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 5);
+        assert!(!cpu.status.contains(CpuFlags::ZERO));
+        assert!(!cpu.status.contains(CpuFlags::NEGATIVE));
+        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 4);
     }
 
     #[test]
-    fn x_value_incremented_by_1_zero_flag_set() {
-        let mut cpu = Cpu::new();
+    fn inx_zero_flag_set() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_run(vec![0xA2, 0xFF, 0xE8, 0x00]);
 
-        cpu.load_and_run(vec![0xA9, 0xFF, 0xAA, 0xE8, 0x00]);
-
-        assert_eq!(cpu.status.bits(), 0b0000_0010);
+        assert_eq!(cpu.register_x, 0x00);
+        assert!(cpu.status.contains(CpuFlags::ZERO));
+        assert!(!cpu.status.contains(CpuFlags::NEGATIVE));
     }
 
     #[test]
-    fn x_value_incremented_by_1_negative_flag_set() {
-        let mut cpu = Cpu::new();
+    fn inx_wrapping_and_negative_flag_set() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_run(vec![0xA2, 0x7F, 0xE8, 0x00]);
 
-        cpu.load_and_run(vec![0xA9, 0x7F, 0xAA, 0xE8, 0x00]);
+        assert_eq!(cpu.register_x, 0x80);
+        assert!(!cpu.status.contains(CpuFlags::ZERO));
+        assert!(cpu.status.contains(CpuFlags::NEGATIVE));
+    }
+}
 
-        assert_eq!(cpu.status.bits(), 0b1000_0000);
+mod iny {
+    use crate::cpu::tests::common::*;
+    use crate::cpu::*;
+
+    #[test]
+    fn iny_value_incremented_by_1() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_run(vec![0xA0, 0x11, 0xC8, 0x00]);
+
+        assert_eq!(cpu.register_y, 0x12);
+        assert!(!cpu.status.contains(CpuFlags::ZERO));
+        assert!(!cpu.status.contains(CpuFlags::NEGATIVE));
+        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 4);
     }
 
     #[test]
-    fn x_value_incremented_over_flow() {
-        let mut cpu = Cpu::new();
-        cpu.load_and_run(vec![0xA9, 0xFF, 0xAA, 0xE8, 0xE8, 0x00]);
-        assert_eq!(cpu.register_a, 0xFF);
-        assert_eq!(cpu.register_x, 0x01);
-        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 6);
-        assert_eq!(cpu.status.bits(), 0b0000_0000);
+    fn iny_zero_flag_set() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_run(vec![0xA0, 0xFF, 0xC8, 0x00]);
+
+        assert_eq!(cpu.register_y, 0x00);
+        assert!(cpu.status.contains(CpuFlags::ZERO));
+        assert!(!cpu.status.contains(CpuFlags::NEGATIVE));
+    }
+
+    #[test]
+    fn iny_wrapping_and_negative_flag_set() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_run(vec![0xA0, 0x7F, 0xC8, 0x00]);
+
+        assert_eq!(cpu.register_y, 0x80);
+        assert!(!cpu.status.contains(CpuFlags::ZERO));
+        assert!(cpu.status.contains(CpuFlags::NEGATIVE));
     }
 }
 
@@ -176,6 +204,71 @@ mod dec {
         cpu.mem_write(0x10, 0x00);
         cpu.load_and_run(vec![0xC6, 0x10, 0x00]);
         assert_eq!(cpu.mem_read(0x10), 0xFF);
+        assert!(cpu.status.contains(CpuFlags::NEGATIVE));
+    }
+}
+
+mod inc {
+    use crate::cpu::tests::common::*;
+    use crate::cpu::*;
+
+    #[test]
+    fn inc_zeropage() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x10, 0x05);
+        cpu.load_and_run(vec![0xE6, 0x10, 0x00]);
+
+        assert_eq!(cpu.mem_read(0x10), 0x06);
+        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 3);
+    }
+
+    #[test]
+    fn inc_zeropage_x() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x10 + 0x02, 0x05);
+        cpu.load_and_reset(vec![0xF6, 0x10, 0x00]);
+        cpu.register_x = 0x02;
+        cpu.run();
+
+        assert_eq!(cpu.mem_read(0x12), 0x06);
+    }
+
+    #[test]
+    fn inc_absolute() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234, 0x05);
+        cpu.load_and_run(vec![0xEE, 0x34, 0x12, 0x00]);
+
+        assert_eq!(cpu.mem_read(0x1234), 0x06);
+        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 4);
+    }
+
+    #[test]
+    fn inc_absolute_x() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234 + 0x02, 0x05);
+        cpu.load_and_reset(vec![0xFE, 0x34, 0x12, 0x00]);
+        cpu.register_x = 0x02;
+        cpu.run();
+
+        assert_eq!(cpu.mem_read(0x1236), 0x06);
+    }
+
+    #[test]
+    fn inc_zero_flag() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x10, 0xFF);
+        cpu.load_and_run(vec![0xE6, 0x10, 0x00]);
+        assert_eq!(cpu.mem_read(0x10), 0x00);
+        assert!(cpu.status.contains(CpuFlags::ZERO));
+    }
+
+    #[test]
+    fn inc_negative_flag() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x10, 0x7F);
+        cpu.load_and_run(vec![0xE6, 0x10, 0x00]);
+        assert_eq!(cpu.mem_read(0x10), 0x80);
         assert!(cpu.status.contains(CpuFlags::NEGATIVE));
     }
 }
