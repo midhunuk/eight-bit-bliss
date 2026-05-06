@@ -42,6 +42,144 @@ mod inx {
     }
 }
 
+mod dex {
+    use crate::cpu::tests::common::*;
+    use crate::cpu::*;
+
+    #[test]
+    fn dex_value_decremented_by_1() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_run(vec![0xA2, 0x05, 0xCA, 0x00]);
+
+        assert_eq!(cpu.register_x, 0x04);
+        assert!(!cpu.status.contains(CpuFlags::ZERO));
+        assert!(!cpu.status.contains(CpuFlags::NEGATIVE));
+        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 4);
+    }
+
+    #[test]
+    fn dex_zero_flag_set() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_run(vec![0xA2, 0x01, 0xCA, 0x00]);
+
+        assert_eq!(cpu.register_x, 0x00);
+        assert!(cpu.status.contains(CpuFlags::ZERO));
+        assert!(!cpu.status.contains(CpuFlags::NEGATIVE));
+    }
+
+    #[test]
+    fn dex_wrapping_and_negative_flag_set() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_run(vec![0xA2, 0x00, 0xCA, 0x00]);
+
+        assert_eq!(cpu.register_x, 0xFF);
+        assert!(!cpu.status.contains(CpuFlags::ZERO));
+        assert!(cpu.status.contains(CpuFlags::NEGATIVE));
+        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 4);
+    }
+}
+
+mod dey {
+    use crate::cpu::tests::common::*;
+    use crate::cpu::*;
+
+    #[test]
+    fn dey_value_decremented_by_1() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_run(vec![0xA0, 0x05, 0x88, 0x00]);
+
+        assert_eq!(cpu.register_y, 0x04);
+        assert!(!cpu.status.contains(CpuFlags::ZERO));
+        assert!(!cpu.status.contains(CpuFlags::NEGATIVE));
+        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 4);
+    }
+
+    #[test]
+    fn dey_zero_flag_set() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_run(vec![0xA0, 0x01, 0x88, 0x00]);
+
+        assert_eq!(cpu.register_y, 0x00);
+        assert!(cpu.status.contains(CpuFlags::ZERO));
+        assert!(!cpu.status.contains(CpuFlags::NEGATIVE));
+    }
+
+    #[test]
+    fn dey_wrapping_and_negative_flag_set() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_run(vec![0xA0, 0x00, 0x88, 0x00]);
+
+        assert_eq!(cpu.register_y, 0xFF);
+        assert!(!cpu.status.contains(CpuFlags::ZERO));
+        assert!(cpu.status.contains(CpuFlags::NEGATIVE));
+        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 4);
+    }
+}
+
+mod dec {
+    use crate::cpu::tests::common::*;
+    use crate::cpu::*;
+
+    #[test]
+    fn dec_zeropage() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x10, 0x05);
+        cpu.load_and_run(vec![0xC6, 0x10, 0x00]);
+
+        assert_eq!(cpu.mem_read(0x10), 0x04);
+        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 3);
+    }
+
+    #[test]
+    fn dec_zeropage_x() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x10 + 0x02, 0x05);
+        cpu.load_and_reset(vec![0xD6, 0x10, 0x00]);
+        cpu.register_x = 0x02;
+        cpu.run();
+
+        assert_eq!(cpu.mem_read(0x12), 0x04);
+    }
+
+    #[test]
+    fn dec_absolute() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234, 0x05);
+        cpu.load_and_run(vec![0xCE, 0x34, 0x12, 0x00]);
+
+        assert_eq!(cpu.mem_read(0x1234), 0x04);
+        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 4);
+    }
+
+    #[test]
+    fn dec_absolute_x() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234 + 0x02, 0x05);
+        cpu.load_and_reset(vec![0xDE, 0x34, 0x12, 0x00]);
+        cpu.register_x = 0x02;
+        cpu.run();
+
+        assert_eq!(cpu.mem_read(0x1236), 0x04);
+    }
+
+    #[test]
+    fn dec_zero_flag() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x10, 0x01);
+        cpu.load_and_run(vec![0xC6, 0x10, 0x00]);
+        assert!(cpu.status.contains(CpuFlags::ZERO));
+    }
+
+    #[test]
+    fn dec_wrapping_and_negative_flag() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x10, 0x00);
+        cpu.load_and_run(vec![0xC6, 0x10, 0x00]);
+        assert_eq!(cpu.mem_read(0x10), 0xFF);
+        assert!(cpu.status.contains(CpuFlags::NEGATIVE));
+    }
+}
+
 mod adc {
     use crate::cpu::tests::common::*;
     use crate::cpu::*;

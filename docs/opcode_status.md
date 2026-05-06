@@ -40,9 +40,9 @@
 | CMP | ✅ | ✅ | IMM, ZP, ZP,X, ABS, ABS,X, ABS,Y, IND,X, IND,Y |
 | CPX | ✅ | ✅ | IMM, ZP, ABS |
 | CPY | ✅ | ✅ | IMM, ZP, ABS |
-| DEC | ❌ | ❌ |  |
-| DEX | ❌ | ❌ |  |
-| DEY | ❌ | ❌ |  |
+| DEC | ✅ | ✅ | ZP, ZP,X, ABS, ABS,X |
+| DEX | ✅ | ✅ | IMP |
+| DEY | ✅ | ✅ | IMP |
 | EOR | ❌ | ❌ |  |
 | INC | ❌ | ❌ |  |
 | INX | ✅ | ✅ | IMP |

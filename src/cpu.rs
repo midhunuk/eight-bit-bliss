@@ -136,6 +136,9 @@ impl Cpu {
                 0xC9 | 0xC5 | 0xD5 | 0xCD | 0xDD | 0xD9 | 0xC1 | 0xD1 => self.cmp(opcode),
                 0xE0 | 0xE4 | 0xEC => self.cpx(opcode),
                 0xC0 | 0xC4 | 0xCC => self.cpy(opcode),
+                0xC6 | 0xD6 | 0xCE | 0xDE  => self.dec(opcode),
+                0xCA => self.dex(),
+                0x88 => self.dey(),
                 0xA9 | 0xA5 | 0xB5 | 0xAD | 0xBD | 0xB9 | 0xA1 | 0xB1 => self.lda(opcode),
                 0xA2 | 0xA6 | 0xB6 | 0xAE | 0xBE => self.ldx(opcode),
                 0xA0 | 0xA4 | 0xB4 | 0xAC | 0xBC => self.ldy(opcode),
@@ -377,6 +380,28 @@ impl Cpu {
         }
 
         self.program_counter += (opcode.len - 1) as u16;
+    }
+
+    fn dec(&mut self, opcode: &OpCode) {
+        let addr = self.get_operand_address(&opcode.mode);
+        let value = self.mem_read(addr);
+
+        let result = value.wrapping_sub(1);
+        self.mem_write(addr, result);
+
+        self.update_zero_and_negative_flags(result);
+
+        self.program_counter += (opcode.len - 1) as u16;
+    }
+
+    fn dex(&mut self) {
+        self.register_x = self.register_x.wrapping_sub(1);
+        self.update_zero_and_negative_flags(self.register_x);
+    }
+
+    fn dey(&mut self) {
+        self.register_y = self.register_y.wrapping_sub(1);
+        self.update_zero_and_negative_flags(self.register_y);
     }
 
     fn lda(&mut self, opcode: &OpCode) {
