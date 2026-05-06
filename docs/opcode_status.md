@@ -37,9 +37,9 @@
 | CLD | ✅ | ✅ | IMP |
 | CLI | ✅ | ✅ | IMP |
 | CLV | ✅ | ✅ | IMP |
-| CMP | ❌ | ❌ |  |
-| CPX | ❌ | ❌ |  |
-| CPY | ❌ | ❌ |  |
+| CMP | ✅ | ✅ | IMM, ZP, ZP,X, ABS, ABS,X, ABS,Y, IND,X, IND,Y |
+| CPX | ✅ | ✅ | IMM, ZP, ABS |
+| CPY | ✅ | ✅ | IMM, ZP, ABS |
 | DEC | ❌ | ❌ |  |
 | DEX | ❌ | ❌ |  |
 | DEY | ❌ | ❌ |  |

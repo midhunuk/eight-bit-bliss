@@ -2,7 +2,8 @@ mod common;
 
 mod arithmetic;
 mod branch;
-mod control;
 mod clear;
+mod compare;
+mod control;
 mod load;
 mod transfer;

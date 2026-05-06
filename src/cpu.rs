@@ -133,6 +133,9 @@ impl Cpu {
                 0xD8 => self.cld(),
                 0x58 => self.cli(),
                 0xB8 => self.clv(),
+                0xC9 | 0xC5 | 0xD5 | 0xCD | 0xDD | 0xD9 | 0xC1 | 0xD1 => self.cmp(opcode),
+                0xE0 | 0xE4 | 0xEC => self.cpx(opcode),
+                0xC0 | 0xC4 | 0xCC => self.cpy(opcode),
                 0xA9 | 0xA5 | 0xB5 | 0xAD | 0xBD | 0xB9 | 0xA1 | 0xB1 => self.lda(opcode),
                 0xA2 | 0xA6 | 0xB6 | 0xAE | 0xBE => self.ldx(opcode),
                 0xA0 | 0xA4 | 0xB4 | 0xAC | 0xBC => self.ldy(opcode),
@@ -338,7 +341,44 @@ impl Cpu {
     fn clv(&mut self){
         self.status.remove(CpuFlags::OVERFLOW);
     }
+
+    fn cmp(&mut self, opcode: &OpCode) {
+        self.compare(opcode, self.register_a);
     
+    }
+
+    fn cpx(&mut self, opcode: &OpCode) {
+        self.compare(opcode, self.register_x);
+    
+    }
+
+    fn cpy(&mut self, opcode: &OpCode) {
+        self.compare(opcode, self.register_y);
+    
+    }
+
+    fn compare(&mut self, opcode: &OpCode, register: u8) {
+        let addr = self.get_operand_address(&opcode.mode);
+        let value = self.mem_read(addr);
+
+        let result = register.wrapping_sub(value);
+        self.update_negative_flag(result);
+
+        if register >= value {
+            self.set_carry_flag();
+        } else {
+            self.clear_carry_flag();
+        }
+
+        if register == value {
+            self.set_zero_flag();
+        } else {
+            self.clear_zero_flag();
+        }
+
+        self.program_counter += (opcode.len - 1) as u16;
+    }
+
     fn lda(&mut self, opcode: &OpCode) {
         let addr = self.get_operand_address(&opcode.mode);
         let value = self.mem_read(addr);

@@ -86,6 +86,24 @@ lazy_static! {
         table[0x58] = Some(OpCode::new(0x58, "CLI", 1, 2, AddressingMode::NoneAddressing));
         table[0xB8] = Some(OpCode::new(0xB8, "CLV", 1, 2, AddressingMode::NoneAddressing));
 
+        //compare
+        table[0xC9] = Some(OpCode::new(0xC9, "CMP", 2, 2, AddressingMode::Immediate));
+        table[0xC5] = Some(OpCode::new(0xC5, "CMP", 2, 3, AddressingMode::ZeroPage));
+        table[0xD5] = Some(OpCode::new(0xD5, "CMP", 2, 4, AddressingMode::ZeroPage_X));
+        table[0xCD] = Some(OpCode::new(0xCD, "CMP", 3, 4, AddressingMode::Absolute));
+        table[0xDD] = Some(OpCode::new(0xDD, "CMP", 3, 4 + 1, AddressingMode::Absolute_X));
+        table[0xD9] = Some(OpCode::new(0xD9, "CMP", 3, 4 + 1, AddressingMode::Absolute_Y));
+        table[0xC1] = Some(OpCode::new(0xC1, "CMP", 2, 6, AddressingMode::Indirect_X));
+        table[0xD1] = Some(OpCode::new(0xD1, "CMP", 2, 5 + 1, AddressingMode::Indirect_Y));
+
+        table[0xE0] = Some(OpCode::new(0xE0, "CPX", 2, 2, AddressingMode::Immediate));
+        table[0xE4] = Some(OpCode::new(0xE4, "CPX", 2, 3, AddressingMode::ZeroPage));
+        table[0xEC] = Some(OpCode::new(0xEC, "CPX", 3, 4, AddressingMode::Absolute));
+
+        table[0xC0] = Some(OpCode::new(0xC0, "CPY", 2, 2, AddressingMode::Immediate));
+        table[0xC4] = Some(OpCode::new(0xC4, "CPY", 2, 3, AddressingMode::ZeroPage));
+        table[0xCC] = Some(OpCode::new(0xCC, "CPY", 3, 4, AddressingMode::Absolute));
+
         //load
         table[0xA9] = Some(OpCode::new(0xA9, "LDA", 2, 2, AddressingMode::Immediate));
         table[0xA5] = Some(OpCode::new(0xA5, "LDA", 2, 3, AddressingMode::ZeroPage));
