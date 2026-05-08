@@ -791,3 +791,143 @@ mod bit {
         assert!(cpu.status.contains(CpuFlags::OVERFLOW));
     }
 }
+
+mod eor {
+    use crate::cpu::tests::common::*;
+    use crate::cpu::*;
+
+    #[test]
+    fn eor_immediate() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_reset(vec![0x49, 0b1111_0000, 0x00]);
+        cpu.register_a = 0b1010_1010;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0b0101_1010);
+        assert!(!cpu.status.contains(CpuFlags::ZERO));
+        assert!(!cpu.status.contains(CpuFlags::NEGATIVE));
+        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 3);
+    }
+
+    #[test]
+    fn eor_zero_flag() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_reset(vec![0x49, 0xFF, 0x00]);
+        cpu.register_a = 0xFF;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0x00);
+        assert!(cpu.status.contains(CpuFlags::ZERO));
+        assert!(!cpu.status.contains(CpuFlags::NEGATIVE));
+    }
+
+    #[test]
+    fn eor_negative_flag() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_reset(vec![0x49, 0x80, 0x00]);
+        cpu.register_a = 0x00;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0x80);
+        assert!(!cpu.status.contains(CpuFlags::ZERO));
+        assert!(cpu.status.contains(CpuFlags::NEGATIVE));
+    }
+
+    #[test]
+    fn eor_zeropage() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x10, 0xCC);
+        cpu.load_and_reset(vec![0x45, 0x10, 0x00]);
+        cpu.register_a = 0xAA;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0x66);
+    }
+
+    #[test]
+    fn eor_zeropage_x() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x10 + 0x05, 0xCC);
+        cpu.load_and_reset(vec![0x55, 0x10, 0x00]);
+        cpu.register_x = 0x05;
+        cpu.register_a = 0xAA;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0x66);
+    }
+
+    #[test]
+    fn eor_absolute() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234, 0xCC);
+        cpu.load_and_reset(vec![0x4D, 0x34, 0x12, 0x00]);
+        cpu.register_a = 0xAA;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0x66);
+    }
+
+    #[test]
+    fn eor_absolute_x() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234 + 0x10, 0xCC);
+        cpu.load_and_reset(vec![0x5D, 0x34, 0x12, 0x00]);
+        cpu.register_x = 0x10;
+        cpu.register_a = 0xAA;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0x66);
+    }
+
+    #[test]
+    fn eor_absolute_y() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234 + 0x10, 0xCC);
+        cpu.load_and_reset(vec![0x59, 0x34, 0x12, 0x00]);
+        cpu.register_y = 0x10;
+        cpu.register_a = 0xAA;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0x66);
+    }
+
+    #[test]
+    fn eor_indirect_x() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234, 0xCC);
+        cpu.mem_write(0x44, 0x34);
+        cpu.mem_write(0x45, 0x12);
+
+        cpu.load_and_reset(vec![0x41, 0x40, 0x00]);
+        cpu.register_x = 0x04;
+        cpu.register_a = 0xAA;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0x66);
+    }
+
+    #[test]
+    fn eor_indirect_y() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234 + 0x04, 0xCC);
+        cpu.mem_write(0x44, 0x34);
+        cpu.mem_write(0x45, 0x12);
+
+        cpu.load_and_reset(vec![0x51, 0x44, 0x00]);
+        cpu.register_y = 0x04;
+        cpu.register_a = 0xAA;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0x66);
+    }
+}

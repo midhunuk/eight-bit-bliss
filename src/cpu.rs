@@ -140,6 +140,7 @@ impl Cpu {
                 0xC6 | 0xD6 | 0xCE | 0xDE => self.dec(opcode),
                 0xCA => self.dex(),
                 0x88 => self.dey(),
+                0x49 | 0x45 | 0x55 | 0x4D | 0x5D | 0x59 | 0x41 | 0x51 => self.eor(opcode),
                 0xE6 | 0xF6 | 0xEE | 0xFE => self.inc(opcode),
                 0xE8 => self.inx(),
                 0xC8 => self.iny(),
@@ -411,6 +412,18 @@ impl Cpu {
     fn dey(&mut self) {
         self.register_y = self.register_y.wrapping_sub(1);
         self.update_zero_and_negative_flags(self.register_y);
+    }
+
+    fn eor(&mut self, opcode: &OpCode) {
+        let addr = self.get_operand_address(&opcode.mode);
+        let value = self.mem_read(addr);
+
+        let result = self.register_a ^ value;
+        self.update_zero_and_negative_flags(result);
+        self.register_a = result;
+
+        self.program_counter += (opcode.len - 1) as u16;
+
     }
 
     fn inc(&mut self, opcode: &OpCode) {

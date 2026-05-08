@@ -43,7 +43,7 @@
 | DEC | ✅ | ✅ | ZP, ZP,X, ABS, ABS,X |
 | DEX | ✅ | ✅ | IMP |
 | DEY | ✅ | ✅ | IMP |
-| EOR | ❌ | ❌ |  |
+| EOR | ✅ | ✅ | IMM, ZP, ZP,X, ABS, ABS,X, ABS,Y, IND,X, IND,Y |
 | INC | ✅ | ✅ | ZP, ZP,X, ABS, ABS,X |
 | INX | ✅ | ✅ | IMP |
 | INY | ✅ | ✅ | IMP |
