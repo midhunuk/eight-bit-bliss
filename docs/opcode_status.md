@@ -47,8 +47,8 @@
 | INC | ✅ | ✅ | ZP, ZP,X, ABS, ABS,X |
 | INX | ✅ | ✅ | IMP |
 | INY | ✅ | ✅ | IMP |
-| JMP | ❌ | ❌ |  |
-| JSR | ❌ | ❌ |  |
+| JMP | ✅ | ✅ | ABS, IND |
+| JSR | ✅ | ✅ | ABS |
 | LDA | ✅ | ✅ | IMM, ZP, ZP,X, ABS, ABS,X, ABS,Y, IND,X, IND,Y |
 | LDX | ✅ | ✅ | IMM, ZP, ZP,Y, ABS, ABS,Y |
 | LDY | ✅ | ✅ | IMM, ZP, ZP,X, ABS, ABS,X |

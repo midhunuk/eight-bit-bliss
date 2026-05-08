@@ -10,6 +10,7 @@ pub enum AddressingMode {
    Absolute,
    Absolute_X,
    Absolute_Y,
+   Indirect,
    Indirect_X,
    Indirect_Y,
    NoneAddressing, //Implied
@@ -153,6 +154,12 @@ lazy_static! {
         table[0xB4] = Some(OpCode::new(0xB4, "LDY", 2, 4, AddressingMode::ZeroPage_X));
         table[0xAC] = Some(OpCode::new(0xAC, "LDY", 3, 4, AddressingMode::Absolute));
         table[0xBC] = Some(OpCode::new(0xBC, "LDY", 3, 4 + 1, AddressingMode::Absolute_X));
+
+        //jump
+        table[0x4C] = Some(OpCode::new(0x4C, "JMP", 3, 3, AddressingMode::Absolute));
+        table[0x6C] = Some(OpCode::new(0x6C, "JMP", 3, 5, AddressingMode::Indirect));
+
+        table[0x20] = Some(OpCode::new(0x20, "JSR", 3, 6, AddressingMode::Absolute));
 
         //transfer
         table[0xAA] = Some(OpCode::new(0xAA, "TAX", 1, 2, AddressingMode::NoneAddressing));
