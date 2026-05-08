@@ -727,3 +727,67 @@ mod asl {
         assert!(cpu.status.contains(CpuFlags::NEGATIVE));
     }
 }
+
+mod bit {
+    use crate::cpu::tests::common::*;
+    use crate::cpu::*;
+
+    #[test]
+    fn bit_zeropage() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x10, 0b1100_0000);
+        cpu.load_and_reset(vec![0x24, 0x10, 0x00]);
+        cpu.register_a = 0x00;
+        cpu.run();
+
+        assert!(cpu.status.contains(CpuFlags::ZERO));
+        assert!(cpu.status.contains(CpuFlags::NEGATIVE));
+        assert!(cpu.status.contains(CpuFlags::OVERFLOW));
+        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 3);
+    }
+
+    #[test]
+    fn bit_absolute() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234, 0b1100_0000);
+        cpu.load_and_reset(vec![0x2C, 0x34, 0x12, 0x00]);
+        cpu.register_a = 0x00;
+        cpu.run();
+
+        assert!(cpu.status.contains(CpuFlags::ZERO));
+        assert!(cpu.status.contains(CpuFlags::NEGATIVE));
+        assert!(cpu.status.contains(CpuFlags::OVERFLOW));
+        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 4);
+    }
+
+    #[test]
+    fn bit_zero_flag() {
+        let mut cpu = set_up_cpu();
+        
+        // A & M == 0 sets Zero flag
+        cpu.mem_write(0x10, 0b0000_1111);
+        cpu.load_and_reset(vec![0x24, 0x10, 0x00]);
+        cpu.register_a = 0b1111_0000;
+        cpu.run();
+        assert!(cpu.status.contains(CpuFlags::ZERO));
+    }
+
+    #[test]
+    fn bit_negative_and_overflow_flags() {
+        let mut cpu = set_up_cpu();
+
+        // Bit 7 is 1 sets Negative flag, bit 6 is 0 clears Overflow
+        cpu.mem_write(0x10, 0b1000_0000);
+        cpu.load_and_reset(vec![0x24, 0x10, 0x00]);
+        cpu.run();
+        assert!(cpu.status.contains(CpuFlags::NEGATIVE));
+        assert!(!cpu.status.contains(CpuFlags::OVERFLOW));
+
+        // Bit 7 is 0 clears Negative flag, bit 6 is 1 sets Overflow
+        cpu.mem_write(0x10, 0b0100_0000);
+        cpu.load_and_reset(vec![0x24, 0x10, 0x00]);
+        cpu.run();
+        assert!(!cpu.status.contains(CpuFlags::NEGATIVE));
+        assert!(cpu.status.contains(CpuFlags::OVERFLOW));
+    }
+}

@@ -124,6 +124,7 @@ impl Cpu {
                 0x90 => self.bcc(),
                 0xB0 => self.bcs(),
                 0xF0 => self.beq(),
+                0x24 | 0x2C => self.bit(opcode),
                 0x30 => self.bmi(),
                 0xD0 => self.bne(),
                 0x10 => self.bpl(),
@@ -136,10 +137,10 @@ impl Cpu {
                 0xC9 | 0xC5 | 0xD5 | 0xCD | 0xDD | 0xD9 | 0xC1 | 0xD1 => self.cmp(opcode),
                 0xE0 | 0xE4 | 0xEC => self.cpx(opcode),
                 0xC0 | 0xC4 | 0xCC => self.cpy(opcode),
-                0xC6 | 0xD6 | 0xCE | 0xDE  => self.dec(opcode),
+                0xC6 | 0xD6 | 0xCE | 0xDE => self.dec(opcode),
                 0xCA => self.dex(),
                 0x88 => self.dey(),
-                0xE6 | 0xF6 | 0xEE | 0xFE  => self.inc(opcode),
+                0xE6 | 0xF6 | 0xEE | 0xFE => self.inc(opcode),
                 0xE8 => self.inx(),
                 0xC8 => self.iny(),
                 0xA9 | 0xA5 | 0xB5 | 0xAD | 0xBD | 0xB9 | 0xA1 | 0xB1 => self.lda(opcode),
@@ -289,8 +290,18 @@ impl Cpu {
         self.branch(condition);
     }
 
-    // fn bit(&mut self) {
-    // }
+    fn bit(&mut self, opcode: &OpCode) {
+        let addr = self.get_operand_address(&opcode.mode);
+        let value = self.mem_read(addr);
+
+        let result = self.register_a & value;
+        self.update_zero_flag(result);
+
+        self.status.set(CpuFlags::NEGATIVE, value & 0b1000_0000 > 0);
+        self.status.set(CpuFlags::OVERFLOW, value & 0b0100_0000 > 0);
+
+        self.program_counter += (opcode.len - 1) as u16;
+    }
 
     fn bmi(&mut self) {
         let condition = self.status.contains(CpuFlags::NEGATIVE);
@@ -325,41 +336,37 @@ impl Cpu {
             let base = self.program_counter as i16;
             let jump_addr = base.wrapping_add(jump as i16) as u16;
             self.program_counter = jump_addr;
-        }
-        else {
+        } else {
             self.program_counter = self.program_counter.wrapping_add(1);
         }
     }
 
-    fn clc(&mut self){
+    fn clc(&mut self) {
         self.status.remove(CpuFlags::CARRY);
     }
 
-    fn cld(&mut self){
+    fn cld(&mut self) {
         self.status.remove(CpuFlags::DECIMAL_MODE);
     }
 
-    fn cli(&mut self){
+    fn cli(&mut self) {
         self.status.remove(CpuFlags::INTERRUPT_DISABLE);
     }
 
-    fn clv(&mut self){
+    fn clv(&mut self) {
         self.status.remove(CpuFlags::OVERFLOW);
     }
 
     fn cmp(&mut self, opcode: &OpCode) {
         self.compare(opcode, self.register_a);
-    
     }
 
     fn cpx(&mut self, opcode: &OpCode) {
         self.compare(opcode, self.register_x);
-    
     }
 
     fn cpy(&mut self, opcode: &OpCode) {
         self.compare(opcode, self.register_y);
-    
     }
 
     fn compare(&mut self, opcode: &OpCode, register: u8) {

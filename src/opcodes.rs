@@ -68,6 +68,9 @@ lazy_static! {
         table[0x0E] = Some(OpCode::new(0x0E, "ASL", 3, 6, AddressingMode::Absolute));
         table[0x1E] = Some(OpCode::new(0x1E, "ASL", 3, 7, AddressingMode::Absolute_X));
 
+        table[0x24] = Some(OpCode::new(0x24, "BIT", 2, 3, AddressingMode::ZeroPage));
+        table[0x2C] = Some(OpCode::new(0x2C, "BIT", 3, 4, AddressingMode::Absolute));
+
         table[0xC6] = Some(OpCode::new(0xC6, "DEC", 2, 5, AddressingMode::ZeroPage));
         table[0xD6] = Some(OpCode::new(0xD6, "DEC", 2, 6, AddressingMode::ZeroPage_X));
         table[0xCE] = Some(OpCode::new(0xCE, "DEC", 3, 6, AddressingMode::Absolute));

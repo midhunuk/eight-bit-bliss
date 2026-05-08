@@ -26,7 +26,7 @@
 | BCC | ✅ | ✅ | REL |
 | BCS | ✅ | ✅ | REL |
 | BEQ | ✅ | ✅ | REL |
-| BIT | ❌ | ❌ |  |
+| BIT | ✅ | ✅ | ZP, ABS |
 | BMI | ✅ | ✅ | REL |
 | BNE | ✅ | ✅ | REL |
 | BPL | ✅ | ✅ | REL |
