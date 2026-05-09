@@ -155,6 +155,8 @@ impl Cpu {
                 0xA0 | 0xA4 | 0xB4 | 0xAC | 0xBC => self.ldy(opcode),
                 0x4C | 0x6C => self.jmp(opcode),
                 0x20 => self.jsr(),
+                0x4A => self.lsr_accumalator(),
+                0x46 | 0x56 | 0x4E | 0x5E => self.lsr(opcode),
                 0xAA => self.tax(),
                 0x00 => return,
                 _ => todo!(),
@@ -531,6 +533,36 @@ impl Cpu {
         self.program_counter = target_address;
     }
 
+    fn lsr_accumalator(&mut self) {
+        let value = self.register_a;
+        if value & 0b0000_0001 == 1 {
+            self.set_carry_flag();
+        } else {
+            self.clear_carry_flag();
+        }
+
+        let result = value >> 1;
+        self.register_a = result;
+        self.update_zero_and_negative_flags(result);
+    }
+
+    fn lsr(&mut self, opcode: &OpCode) {
+        let address = self.get_operand_address(&opcode.mode);
+        let value = self.mem_read(address);
+
+        if value & 0b0000_0001 == 1{
+            self.set_carry_flag();
+        } else {
+            self.clear_carry_flag();
+        }
+
+        let result = value >> 1;
+        self.mem_write(address, result);
+        self.update_zero_and_negative_flags(result);
+
+        self.program_counter += (opcode.len - 1) as u16;
+    }
+
     fn tax(&mut self) {
         self.register_x = self.register_a;
         self.update_zero_and_negative_flags(self.register_x);
@@ -572,6 +604,7 @@ impl Cpu {
     fn clear_carry_flag(&mut self) {
         self.status.remove(CpuFlags::CARRY);
     }
+    
     fn set_negative_flag(&mut self) {
         self.status.insert(CpuFlags::NEGATIVE);
     }
@@ -579,6 +612,7 @@ impl Cpu {
     fn clear_negative_flag(&mut self) {
         self.status.remove(CpuFlags::NEGATIVE);
     }
+
 }
 
 fn validate_program(program: &[u8]) {

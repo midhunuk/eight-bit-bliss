@@ -52,7 +52,7 @@
 | LDA | ✅ | ✅ | IMM, ZP, ZP,X, ABS, ABS,X, ABS,Y, IND,X, IND,Y |
 | LDX | ✅ | ✅ | IMM, ZP, ZP,Y, ABS, ABS,Y |
 | LDY | ✅ | ✅ | IMM, ZP, ZP,X, ABS, ABS,X |
-| LSR | ❌ | ❌ |  |
+| LSR | ✅ | ✅ | ACC, ZP, ZP,X, ABS, ABS,X |
 | NOP | ❌ | ❌ |  |
 | ORA | ❌ | ❌ |  |
 | PHA | ❌ | ❌ |  |

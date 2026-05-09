@@ -99,6 +99,12 @@ lazy_static! {
 
         table[0xC8] = Some(OpCode::new(0xC8, "INY", 1, 2, AddressingMode::NoneAddressing));
 
+        table[0x4A] = Some(OpCode::new(0x4A, "LSR", 1, 2, AddressingMode::Accumulator));
+        table[0x46] = Some(OpCode::new(0x46, "LSR", 2, 5, AddressingMode::ZeroPage));
+        table[0x56] = Some(OpCode::new(0x56, "LSR", 2, 6, AddressingMode::ZeroPage_X));
+        table[0x4E] = Some(OpCode::new(0x4E, "LSR", 3, 6, AddressingMode::Absolute));
+        table[0x5E] = Some(OpCode::new(0x5E, "LSR", 3, 7, AddressingMode::Absolute_X));
+
         //branch
         table[0x90] = Some(OpCode::new(0x90, "BCC", 2, 2 + 1 + 2, AddressingMode::Relative));
         table[0xB0] = Some(OpCode::new(0xB0, "BCS", 2, 2 + 1 + 2, AddressingMode::Relative));
