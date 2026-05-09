@@ -179,6 +179,12 @@ lazy_static! {
         //nop
         table[0xEA] = Some(OpCode::new(0xEA, "NOP", 1, 2, AddressingMode::Implied));
 
+        //stack pull & push
+        table[0x48] = Some(OpCode::new(0x48, "PHA", 1, 3, AddressingMode::Implied));
+        table[0x08] = Some(OpCode::new(0x08, "PHP", 1, 3, AddressingMode::Implied));
+        table[0x68] = Some(OpCode::new(0x68, "PLA", 1, 4, AddressingMode::Implied));
+        table[0x28] = Some(OpCode::new(0x28, "PLP", 1, 4, AddressingMode::Implied));
+
         //transfer
         table[0xAA] = Some(OpCode::new(0xAA, "TAX", 1, 2, AddressingMode::Implied));
 

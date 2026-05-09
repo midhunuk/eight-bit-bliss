@@ -55,10 +55,10 @@
 | LSR | ✅ | ✅ | ACC, ZP, ZP,X, ABS, ABS,X |
 | NOP | ✅ | ✅ | IMP |
 | ORA | ✅ | ✅ | IMM, ZP, ZP,X, ABS, ABS,X, ABS,Y, IND,X, IND,Y |
-| PHA | ❌ | ❌ |  |
-| PHP | ❌ | ❌ |  |
-| PLA | ❌ | ❌ |  |
-| PLP | ❌ | ❌ |  |
+| PHA | ✅ | ✅ | IMP |
+| PHP | ✅ | ✅ | IMP |
+| PLA | ✅ | ✅ | IMP |
+| PLP | ✅ | ✅ | IMP |
 | ROL | ❌ | ❌ |  |
 | ROR | ❌ | ❌ |  |
 | RTI | ❌ | ❌ |  |

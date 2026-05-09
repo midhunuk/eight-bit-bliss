@@ -159,6 +159,10 @@ impl Cpu {
                 0x46 | 0x56 | 0x4E | 0x5E => self.lsr(opcode),
                 0xEA => {} //NOP do nothing
                 0x09 | 0x05 | 0x15 | 0x0D | 0x1D | 0x19 | 0x01 | 0x11 => self.ora(opcode),
+                0x48 => self.pha(),
+                0x08 => self.php(),
+                0x68 => self.pla(),
+                0x28 => self.plp(),
                 0xAA => self.tax(),
                 0x00 => return,
                 _ => todo!(),
@@ -236,11 +240,11 @@ impl Cpu {
     //     (hi << 8) | lo
     // }
 
-    // fn stack_pop(&mut self) -> u8 {
-    //     self.stack_pointer = self.stack_pointer.wrapping_add(1);
-    //     let addr = STACK + self.stack_pointer as u16;
-    //     self.mem_read(addr)
-    // }
+    fn stack_pop(&mut self) -> u8 {
+        self.stack_pointer = self.stack_pointer.wrapping_add(1);
+        let addr = STACK + self.stack_pointer as u16;
+        self.mem_read(addr)
+    }
 
     fn stack_push(&mut self, data: u8) {
         let addr = STACK + self.stack_pointer as u16;
@@ -573,6 +577,24 @@ impl Cpu {
         self.update_zero_and_negative_flags(result);
 
         self.program_counter += (opcode.len - 1) as u16;
+    }
+
+    fn pha(&mut self) {
+        self.stack_push(self.register_a);
+    }
+
+    fn php(&mut self) {
+        self.stack_push(self.status.bits());
+    }
+
+    fn pla(&mut self) {
+        self.register_a = self.stack_pop();
+        self.update_zero_and_negative_flags(self.register_a);
+    }
+
+    fn plp(&mut self) {
+        let status = self.stack_pop();
+        self.status = CpuFlags::from_bits_truncate(status);
     }
 
     fn tax(&mut self) {
