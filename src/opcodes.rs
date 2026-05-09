@@ -126,6 +126,15 @@ lazy_static! {
         table[0x6E] = Some(OpCode::new(0x6E, "ROR", 3, 6, AddressingMode::Absolute));
         table[0x7E] = Some(OpCode::new(0x7E, "ROR", 3, 7, AddressingMode::Absolute_X));
 
+        table[0xE9] = Some(OpCode::new(0xE9, "SBC", 2, 2, AddressingMode::Immediate));
+        table[0xE5] = Some(OpCode::new(0xE5, "SBC", 2, 3, AddressingMode::ZeroPage));
+        table[0xF5] = Some(OpCode::new(0xF5, "SBC", 2, 4, AddressingMode::ZeroPage_X));
+        table[0xED] = Some(OpCode::new(0xED, "SBC", 3, 4, AddressingMode::Absolute));
+        table[0xFD] = Some(OpCode::new(0xFD, "SBC", 3, 4 + 1, AddressingMode::Absolute_X));
+        table[0xF9] = Some(OpCode::new(0xF9, "SBC", 3, 4 + 1, AddressingMode::Absolute_Y));
+        table[0xE1] = Some(OpCode::new(0xE1, "SBC", 2, 6, AddressingMode::Indirect_X));
+        table[0xF1] = Some(OpCode::new(0xF1, "SBC", 2, 5 + 1, AddressingMode::Indirect_Y));
+
         //branch
         table[0x90] = Some(OpCode::new(0x90, "BCC", 2, 2 + 1 + 2, AddressingMode::Relative));
         table[0xB0] = Some(OpCode::new(0xB0, "BCS", 2, 2 + 1 + 2, AddressingMode::Relative));

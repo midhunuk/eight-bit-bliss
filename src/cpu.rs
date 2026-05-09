@@ -169,6 +169,7 @@ impl Cpu {
                 0x66 | 0x76 | 0x6E | 0x7E => self.ror(opcode),
                 0x40 => self.rti(),
                 0x60 => self.rts(),
+                0xE9 | 0xE5 | 0xF5 | 0xED | 0xFD | 0xF9 | 0xE1 | 0xF1 => self.sbc(opcode),
                 0xAA => self.tax(),
                 0x00 => return,
                 _ => todo!(),
@@ -679,14 +680,42 @@ impl Cpu {
         self.program_counter += (opcode.len - 1) as u16;
     }
 
-    fn rti(&mut self){
+    fn rti(&mut self) {
         let status = self.stack_pop();
         self.status = CpuFlags::from_bits_truncate(status);
         self.program_counter = self.stack_pop_u16();
     }
 
-    fn rts(&mut self){
+    fn rts(&mut self) {
         self.program_counter = self.stack_pop_u16() + 1;
+    }
+
+    fn sbc(&mut self, opcode: &OpCode) {
+        let address = self.get_operand_address(&opcode.mode);
+        let value = self.mem_read(address);
+        let carry = self.status.contains(CpuFlags::CARRY) as u16;
+
+        let result = self.register_a as u16 - value as u16 - (1 - carry);
+
+        if result > 0xFF {
+            self.set_carry_flag();
+        } else {
+            self.clear_carry_flag();
+        }
+
+        let result = result as u8;
+
+        if (self.register_a ^ value) & (self.register_a ^ result) & 0x80 != 0 {
+            self.status.insert(CpuFlags::OVERFLOW);
+        } else {
+            self.status.remove(CpuFlags::OVERFLOW);
+        }
+
+        self.register_a = result;
+
+        self.update_zero_and_negative_flags(self.register_a);
+
+        self.program_counter += (opcode.len - 1) as u16;
     }
 
     fn tax(&mut self) {

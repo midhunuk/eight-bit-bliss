@@ -1302,3 +1302,157 @@ mod ror{
     }
 }
 
+mod sbc {
+    use crate::cpu::tests::common::*;
+    use crate::cpu::*;
+
+    #[test]
+    fn sbc_immediate_no_borrow() {
+        let mut cpu = set_up_cpu();
+        // A=0x50, M=0x30, C=1 (no borrow)
+        // 0x50 - 0x30 - (1 - 1) = 0x20
+        cpu.load_and_reset(vec![0xE9, 0x30, 0x00]);
+        cpu.register_a = 0x50;
+        cpu.status.insert(CpuFlags::CARRY);
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0x20);
+        assert!(!cpu.status.contains(CpuFlags::CARRY));
+        assert!(!cpu.status.contains(CpuFlags::NEGATIVE));
+        assert!(!cpu.status.contains(CpuFlags::ZERO));
+    }
+
+    #[test]
+    fn sbc_immediate_with_borrow() {
+        let mut cpu = set_up_cpu();
+        // A=0x50, M=0x70, C=1
+        // 0x50 - 0x70 = -0x20 -> 0xE0
+        cpu.load_and_reset(vec![0xE9, 0x70, 0x00]);
+        cpu.register_a = 0x50;
+        cpu.status.insert(CpuFlags::CARRY);
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0xE0);
+        assert!(cpu.status.contains(CpuFlags::CARRY)); // Borrow occurred
+        assert!(cpu.status.contains(CpuFlags::NEGATIVE));
+    }
+
+    #[test]
+    fn sbc_with_carry_flag_zero() {
+        let mut cpu = set_up_cpu();
+        // A=0x50, M=0x30, C=0 (borrow already present)
+        // 0x50 - 0x30 - (1 - 0) = 0x1F
+        cpu.load_and_reset(vec![0xE9, 0x30, 0x00]);
+        cpu.register_a = 0x50;
+        cpu.status.remove(CpuFlags::CARRY);
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0x1F);
+    }
+
+    #[test]
+    fn sbc_overflow() {
+        let mut cpu = set_up_cpu();
+        // A = -128 (0x80), M = 1 (0x01), C = 1
+        // -128 - 1 = -129 (Overflow!) -> 0x7F
+        cpu.load_and_reset(vec![0xE9, 0x01, 0x00]);
+        cpu.register_a = 0x80;
+        cpu.status.insert(CpuFlags::CARRY);
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0x7F);
+        assert!(cpu.status.contains(CpuFlags::OVERFLOW));
+    }
+
+    #[test]
+    fn sbc_zeropage() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x10, 0x30);
+        cpu.load_and_reset(vec![0xE5, 0x10, 0x00]);
+        cpu.register_a = 0x50;
+        cpu.status.insert(CpuFlags::CARRY);
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0x20);
+    }
+
+    #[test]
+    fn sbc_zeropage_x() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x15, 0x30);
+        cpu.load_and_reset(vec![0xF5, 0x10, 0x00]);
+        cpu.register_x = 0x05;
+        cpu.register_a = 0x50;
+        cpu.status.insert(CpuFlags::CARRY);
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0x20);
+    }
+
+    #[test]
+    fn sbc_absolute() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234, 0x30);
+        cpu.load_and_reset(vec![0xED, 0x34, 0x12, 0x00]);
+        cpu.register_a = 0x50;
+        cpu.status.insert(CpuFlags::CARRY);
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0x20);
+    }
+
+    #[test]
+    fn sbc_indirect_y() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write_u16(0x10, 0x1234);
+        cpu.mem_write(0x1238, 0x30);
+        cpu.load_and_reset(vec![0xF1, 0x10, 0x00]);
+        cpu.register_y = 0x04;
+        cpu.register_a = 0x50;
+        cpu.status.insert(CpuFlags::CARRY);
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0x20);
+    }
+
+    #[test]
+    fn sbc_absolute_x() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234 + 0x10, 0x30);
+        cpu.load_and_reset(vec![0xFD, 0x34, 0x12, 0x00]);
+        cpu.register_x = 0x10;
+        cpu.register_a = 0x50;
+        cpu.status.insert(CpuFlags::CARRY);
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0x20);
+    }
+
+    #[test]
+    fn sbc_absolute_y() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234 + 0x10, 0x30);
+        cpu.load_and_reset(vec![0xF9, 0x34, 0x12, 0x00]);
+        cpu.register_y = 0x10;
+        cpu.register_a = 0x50;
+        cpu.status.insert(CpuFlags::CARRY);
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0x20);
+    }
+
+    #[test]
+    fn sbc_indirect_x() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write_u16(0x44, 0x1234);
+        cpu.mem_write(0x1234, 0x30);
+        cpu.load_and_reset(vec![0xE1, 0x40, 0x00]);
+        cpu.register_x = 0x04;
+        cpu.register_a = 0x50;
+        cpu.status.insert(CpuFlags::CARRY);
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0x20);
+    }
+}
+

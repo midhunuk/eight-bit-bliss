@@ -63,7 +63,7 @@
 | ROR | ✅ | ✅ | ACC, ZP, ZP,X, ABS, ABS,X |
 | RTI | ✅ | ✅ | IMP |
 | RTS | ✅ | ✅ | IMP |
-| SBC | ❌ | ❌ |  |
+| SBC | ✅ | ✅ | IMM, ZP, ZP,X, ABS, ABS,X, ABS,Y, IND,X, IND,Y |
 | SEC | ❌ | ❌ |  |
 | SED | ❌ | ❌ |  |
 | SEI | ❌ | ❌ |  |
