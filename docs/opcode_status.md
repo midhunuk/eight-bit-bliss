@@ -71,8 +71,8 @@
 | STX | ✅ | ✅ | ZP, ZP,Y, ABS |
 | STY | ✅ | ✅ | ZP, ZP,X, ABS |
 | TAX | ✅ | ✅ | IMP |
-| TAY | ❌ | ❌ |  |
-| TSX | ❌ | ❌ |  |
-| TXA | ❌ | ❌ |  |
-| TXS | ❌ | ❌ |  |
-| TYA | ❌ | ❌ |  |
+| TAY | ✅ | ✅ | IMP |
+| TSX | ✅ | ✅ | IMP |
+| TXA | ✅ | ✅ | IMP |
+| TXS | ✅ | ✅ | IMP |
+| TYA | ✅ | ✅ | IMP |
