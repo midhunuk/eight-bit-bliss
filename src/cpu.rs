@@ -157,6 +157,7 @@ impl Cpu {
                 0x20 => self.jsr(),
                 0x4A => self.lsr_accumalator(),
                 0x46 | 0x56 | 0x4E | 0x5E => self.lsr(opcode),
+                0xEA => {} //NOP do nothing
                 0xAA => self.tax(),
                 0x00 => return,
                 _ => todo!(),
@@ -464,7 +465,6 @@ impl Cpu {
         self.register_a = result;
 
         self.program_counter += (opcode.len - 1) as u16;
-
     }
 
     fn inc(&mut self, opcode: &OpCode) {
@@ -527,7 +527,7 @@ impl Cpu {
         self.program_counter = addr;
     }
 
-    fn jsr(&mut self){
+    fn jsr(&mut self) {
         self.stack_push_u16(self.program_counter + 2 - 1);
         let target_address = self.get_operand_address(&AddressingMode::Absolute);
         self.program_counter = target_address;
@@ -550,7 +550,7 @@ impl Cpu {
         let address = self.get_operand_address(&opcode.mode);
         let value = self.mem_read(address);
 
-        if value & 0b0000_0001 == 1{
+        if value & 0b0000_0001 == 1 {
             self.set_carry_flag();
         } else {
             self.clear_carry_flag();
@@ -604,7 +604,7 @@ impl Cpu {
     fn clear_carry_flag(&mut self) {
         self.status.remove(CpuFlags::CARRY);
     }
-    
+
     fn set_negative_flag(&mut self) {
         self.status.insert(CpuFlags::NEGATIVE);
     }
@@ -612,7 +612,6 @@ impl Cpu {
     fn clear_negative_flag(&mut self) {
         self.status.remove(CpuFlags::NEGATIVE);
     }
-
 }
 
 fn validate_program(program: &[u8]) {

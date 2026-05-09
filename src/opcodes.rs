@@ -13,7 +13,7 @@ pub enum AddressingMode {
    Indirect,
    Indirect_X,
    Indirect_Y,
-   NoneAddressing, //Implied
+   Implied,
    Accumulator,
    Relative
 }
@@ -42,7 +42,7 @@ lazy_static! {
     pub static ref OPCODES: [Option<OpCode>; 256] = {
         let mut table: [Option<OpCode>; 256] = [(); 256].map(|_| None);
 
-        table[0x00] = Some(OpCode::new(0x00, "BRK", 1, 7, AddressingMode::NoneAddressing));
+        table[0x00] = Some(OpCode::new(0x00, "BRK", 1, 7, AddressingMode::Implied));
 
         //arithmetic
         table[0x69] = Some(OpCode::new(0x69, "ADC", 2, 2, AddressingMode::Immediate));
@@ -77,9 +77,9 @@ lazy_static! {
         table[0xCE] = Some(OpCode::new(0xCE, "DEC", 3, 6, AddressingMode::Absolute));
         table[0xDE] = Some(OpCode::new(0xDE, "DEC", 3, 7, AddressingMode::Absolute_X));
 
-        table[0xCA] = Some(OpCode::new(0xCA, "DEX", 1, 2, AddressingMode::NoneAddressing));
+        table[0xCA] = Some(OpCode::new(0xCA, "DEX", 1, 2, AddressingMode::Implied));
 
-        table[0x88] = Some(OpCode::new(0x88, "DEY", 1, 2, AddressingMode::NoneAddressing));
+        table[0x88] = Some(OpCode::new(0x88, "DEY", 1, 2, AddressingMode::Implied));
 
         table[0x49] = Some(OpCode::new(0x49, "EOR", 2, 2, AddressingMode::Immediate));
         table[0x45] = Some(OpCode::new(0x45, "EOR", 2, 3, AddressingMode::ZeroPage));
@@ -95,9 +95,9 @@ lazy_static! {
         table[0xEE] = Some(OpCode::new(0xEE, "INC", 3, 6, AddressingMode::Absolute));
         table[0xFE] = Some(OpCode::new(0xFE, "INC", 3, 7, AddressingMode::Absolute_X));
 
-        table[0xE8] = Some(OpCode::new(0xE8, "INX", 1, 2, AddressingMode::NoneAddressing));
+        table[0xE8] = Some(OpCode::new(0xE8, "INX", 1, 2, AddressingMode::Implied));
 
-        table[0xC8] = Some(OpCode::new(0xC8, "INY", 1, 2, AddressingMode::NoneAddressing));
+        table[0xC8] = Some(OpCode::new(0xC8, "INY", 1, 2, AddressingMode::Implied));
 
         table[0x4A] = Some(OpCode::new(0x4A, "LSR", 1, 2, AddressingMode::Accumulator));
         table[0x46] = Some(OpCode::new(0x46, "LSR", 2, 5, AddressingMode::ZeroPage));
@@ -116,10 +116,10 @@ lazy_static! {
         table[0x70] = Some(OpCode::new(0x70, "BVS", 2, 2 + 1 + 2, AddressingMode::Relative));
 
         //clear register
-        table[0x18] = Some(OpCode::new(0x18, "CLC", 1, 2, AddressingMode::NoneAddressing));
-        table[0xD8] = Some(OpCode::new(0xD8, "CLD", 1, 2, AddressingMode::NoneAddressing));
-        table[0x58] = Some(OpCode::new(0x58, "CLI", 1, 2, AddressingMode::NoneAddressing));
-        table[0xB8] = Some(OpCode::new(0xB8, "CLV", 1, 2, AddressingMode::NoneAddressing));
+        table[0x18] = Some(OpCode::new(0x18, "CLC", 1, 2, AddressingMode::Implied));
+        table[0xD8] = Some(OpCode::new(0xD8, "CLD", 1, 2, AddressingMode::Implied));
+        table[0x58] = Some(OpCode::new(0x58, "CLI", 1, 2, AddressingMode::Implied));
+        table[0xB8] = Some(OpCode::new(0xB8, "CLV", 1, 2, AddressingMode::Implied));
 
         //compare
         table[0xC9] = Some(OpCode::new(0xC9, "CMP", 2, 2, AddressingMode::Immediate));
@@ -167,8 +167,11 @@ lazy_static! {
 
         table[0x20] = Some(OpCode::new(0x20, "JSR", 3, 6, AddressingMode::Absolute));
 
+        //nop
+        table[0xEA] = Some(OpCode::new(0xEA, "NOP", 1, 2, AddressingMode::Implied));
+
         //transfer
-        table[0xAA] = Some(OpCode::new(0xAA, "TAX", 1, 2, AddressingMode::NoneAddressing));
+        table[0xAA] = Some(OpCode::new(0xAA, "TAX", 1, 2, AddressingMode::Implied));
 
         table
     };

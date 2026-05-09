@@ -53,7 +53,7 @@
 | LDX | ✅ | ✅ | IMM, ZP, ZP,Y, ABS, ABS,Y |
 | LDY | ✅ | ✅ | IMM, ZP, ZP,X, ABS, ABS,X |
 | LSR | ✅ | ✅ | ACC, ZP, ZP,X, ABS, ABS,X |
-| NOP | ❌ | ❌ |  |
+| NOP | ✅ | ✅ | IMP |
 | ORA | ❌ | ❌ |  |
 | PHA | ❌ | ❌ |  |
 | PHP | ❌ | ❌ |  |
