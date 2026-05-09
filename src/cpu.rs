@@ -158,6 +158,7 @@ impl Cpu {
                 0x4A => self.lsr_accumalator(),
                 0x46 | 0x56 | 0x4E | 0x5E => self.lsr(opcode),
                 0xEA => {} //NOP do nothing
+                0x09 | 0x05 | 0x15 | 0x0D | 0x1D | 0x19 | 0x01 | 0x11 => self.ora(opcode),
                 0xAA => self.tax(),
                 0x00 => return,
                 _ => todo!(),
@@ -558,6 +559,17 @@ impl Cpu {
 
         let result = value >> 1;
         self.mem_write(address, result);
+        self.update_zero_and_negative_flags(result);
+
+        self.program_counter += (opcode.len - 1) as u16;
+    }
+
+    fn ora(&mut self, opcode: &OpCode) {
+        let address = self.get_operand_address(&opcode.mode);
+        let value = self.mem_read(address);
+
+        let result = self.register_a | value;
+        self.register_a = result;
         self.update_zero_and_negative_flags(result);
 
         self.program_counter += (opcode.len - 1) as u16;

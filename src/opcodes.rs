@@ -105,6 +105,15 @@ lazy_static! {
         table[0x4E] = Some(OpCode::new(0x4E, "LSR", 3, 6, AddressingMode::Absolute));
         table[0x5E] = Some(OpCode::new(0x5E, "LSR", 3, 7, AddressingMode::Absolute_X));
 
+        table[0x09] = Some(OpCode::new(0x09, "ORA", 2, 2, AddressingMode::Immediate));
+        table[0x05] = Some(OpCode::new(0x05, "ORA", 2, 3, AddressingMode::ZeroPage));
+        table[0x15] = Some(OpCode::new(0x15, "ORA", 2, 4, AddressingMode::ZeroPage_X));
+        table[0x0D] = Some(OpCode::new(0x0D, "ORA", 3, 4, AddressingMode::Absolute));
+        table[0x1D] = Some(OpCode::new(0x1D, "ORA", 3, 4 + 1, AddressingMode::Absolute_X));
+        table[0x19] = Some(OpCode::new(0x19, "ORA", 3, 4 + 1, AddressingMode::Absolute_Y));
+        table[0x01] = Some(OpCode::new(0x01, "ORA", 2, 6, AddressingMode::Indirect_X));
+        table[0x11] = Some(OpCode::new(0x11, "ORA", 2, 5 + 1, AddressingMode::Indirect_Y));
+
         //branch
         table[0x90] = Some(OpCode::new(0x90, "BCC", 2, 2 + 1 + 2, AddressingMode::Relative));
         table[0xB0] = Some(OpCode::new(0xB0, "BCS", 2, 2 + 1 + 2, AddressingMode::Relative));

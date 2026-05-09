@@ -1019,3 +1019,127 @@ mod lsr {
         assert_eq!(cpu.mem_read(0x1235), 0b0000_0011);
     }
 }
+
+mod ora {
+    use crate::cpu::tests::common::*;
+    use crate::cpu::*;
+
+    #[test]
+    fn ora_immediate() {
+        let mut cpu = set_up_cpu();
+        // ORA #$CC
+        cpu.load_and_reset(vec![0x09, 0xCC, 0x00]);
+        cpu.register_a = 0xAA;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0xEE);
+        assert!(!cpu.status.contains(CpuFlags::ZERO));
+        assert!(cpu.status.contains(CpuFlags::NEGATIVE));
+        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 3);
+    }
+
+    #[test]
+    fn ora_zero_flag() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_reset(vec![0x09, 0x00, 0x00]);
+        cpu.register_a = 0x00;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0x00);
+        assert!(cpu.status.contains(CpuFlags::ZERO));
+        assert!(!cpu.status.contains(CpuFlags::NEGATIVE));
+    }
+
+    #[test]
+    fn ora_zeropage() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x10, 0xCC);
+        cpu.load_and_reset(vec![0x05, 0x10, 0x00]);
+        cpu.register_a = 0xAA;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0xEE);
+    }
+
+    #[test]
+    fn ora_zeropage_x() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x10 + 0x05, 0xCC);
+        cpu.load_and_reset(vec![0x15, 0x10, 0x00]);
+        cpu.register_x = 0x05;
+        cpu.register_a = 0xAA;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0xEE);
+    }
+
+    #[test]
+    fn ora_absolute() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234, 0xCC);
+        cpu.load_and_reset(vec![0x0D, 0x34, 0x12, 0x00]);
+        cpu.register_a = 0xAA;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0xEE);
+    }
+
+    #[test]
+    fn ora_absolute_x() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234 + 0x10, 0xCC);
+        cpu.load_and_reset(vec![0x1D, 0x34, 0x12, 0x00]);
+        cpu.register_x = 0x10;
+        cpu.register_a = 0xAA;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0xEE);
+    }
+
+    #[test]
+    fn ora_absolute_y() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234 + 0x10, 0xCC);
+        cpu.load_and_reset(vec![0x19, 0x34, 0x12, 0x00]);
+        cpu.register_y = 0x10;
+        cpu.register_a = 0xAA;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0xEE);
+    }
+
+    #[test]
+    fn ora_indirect_x() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write_u16(0x10 + 0x04, 0x1234);
+        cpu.mem_write(0x1234, 0xCC);
+        cpu.load_and_reset(vec![0x01, 0x10, 0x00]);
+        cpu.register_x = 0x04;
+        cpu.register_a = 0xAA;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0xEE);
+    }
+
+    #[test]
+    fn ora_indirect_y() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write_u16(0x10, 0x1234);
+        cpu.mem_write(0x1234 + 0x04, 0xCC);
+        cpu.load_and_reset(vec![0x11, 0x10, 0x00]);
+        cpu.register_y = 0x04;
+        cpu.register_a = 0xAA;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0xEE);
+    }
+}

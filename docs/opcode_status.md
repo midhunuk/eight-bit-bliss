@@ -54,7 +54,7 @@
 | LDY | ✅ | ✅ | IMM, ZP, ZP,X, ABS, ABS,X |
 | LSR | ✅ | ✅ | ACC, ZP, ZP,X, ABS, ABS,X |
 | NOP | ✅ | ✅ | IMP |
-| ORA | ❌ | ❌ |  |
+| ORA | ✅ | ✅ | IMM, ZP, ZP,X, ABS, ABS,X, ABS,Y, IND,X, IND,Y |
 | PHA | ❌ | ❌ |  |
 | PHP | ❌ | ❌ |  |
 | PLA | ❌ | ❌ |  |
