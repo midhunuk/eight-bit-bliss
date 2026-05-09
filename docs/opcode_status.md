@@ -67,9 +67,9 @@
 | SEC | ✅ | ✅ | IMP |
 | SED | ✅ | ✅ | IMP |
 | SEI | ✅ | ✅ | IMP |
-| STA | ❌ | ❌ |  |
-| STX | ❌ | ❌ |  |
-| STY | ❌ | ❌ |  |
+| STA | ✅ | ✅ | ZP, ZP,X, ABS, ABS,X, ABS,Y, IND,X, IND,Y |
+| STX | ✅ | ✅ | ZP, ZP,Y, ABS |
+| STY | ✅ | ✅ | ZP, ZP,X, ABS |
 | TAX | ✅ | ✅ | IMP |
 | TAY | ❌ | ❌ |  |
 | TSX | ❌ | ❌ |  |

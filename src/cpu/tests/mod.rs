@@ -9,3 +9,4 @@ mod load;
 mod transfer;
 mod set;
 mod stack;
+mod store;

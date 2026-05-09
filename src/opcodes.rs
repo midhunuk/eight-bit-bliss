@@ -215,6 +215,23 @@ lazy_static! {
         table[0xF8] = Some(OpCode::new(0xF8, "SED", 1, 2, AddressingMode::Implied));
         table[0x78] = Some(OpCode::new(0x78, "SEI", 1, 2, AddressingMode::Implied));
 
+        //store
+        table[0x85] = Some(OpCode::new(0x85, "STA", 2, 3, AddressingMode::ZeroPage));
+        table[0x95] = Some(OpCode::new(0x95, "STA", 2, 4, AddressingMode::ZeroPage_X));
+        table[0x8D] = Some(OpCode::new(0x8D, "STA", 3, 4, AddressingMode::Absolute));
+        table[0x9D] = Some(OpCode::new(0x9D, "STA", 3, 5, AddressingMode::Absolute_X));
+        table[0x99] = Some(OpCode::new(0x99, "STA", 3, 5, AddressingMode::Absolute_Y));
+        table[0x81] = Some(OpCode::new(0x81, "STA", 2, 6, AddressingMode::Indirect_X));
+        table[0x91] = Some(OpCode::new(0x91, "STA", 2, 6, AddressingMode::Indirect_Y));
+
+        table[0x86] = Some(OpCode::new(0x86, "STX", 2, 3, AddressingMode::ZeroPage));
+        table[0x96] = Some(OpCode::new(0x96, "STX", 2, 4, AddressingMode::ZeroPage_Y));
+        table[0x8E] = Some(OpCode::new(0x8E, "STX", 3, 4, AddressingMode::Absolute));
+
+        table[0x84] = Some(OpCode::new(0x84, "STY", 2, 3, AddressingMode::ZeroPage));
+        table[0x94] = Some(OpCode::new(0x94, "STY", 2, 4, AddressingMode::ZeroPage_X));
+        table[0x8C] = Some(OpCode::new(0x8C, "STY", 3, 4, AddressingMode::Absolute));
+
         //transfer
         table[0xAA] = Some(OpCode::new(0xAA, "TAX", 1, 2, AddressingMode::Implied));
 

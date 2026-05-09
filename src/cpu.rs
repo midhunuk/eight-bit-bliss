@@ -173,6 +173,9 @@ impl Cpu {
                 0x38 => self.sec(),
                 0xF8 => self.sed(),
                 0x78 => self.sei(),
+                0x85 | 0x95 | 0x8D | 0x9D | 0x99 | 0x81 | 0x91 => self.sta(opcode),
+                0x86 | 0x96 | 0x8E => self.stx(opcode),
+                0x84 | 0x94 | 0x8C => self.sty(opcode),
                 0xAA => self.tax(),
                 0x00 => return,
                 _ => todo!(),
@@ -731,6 +734,24 @@ impl Cpu {
 
     fn sei(&mut self) {
         self.status.insert(CpuFlags::INTERRUPT_DISABLE);
+    }
+
+    fn sta(&mut self, opcode: &OpCode){
+        let address = self.get_operand_address(&opcode.mode);
+        self.mem_write(address, self.register_a);
+        self.program_counter += (opcode.len - 1) as u16;
+    }
+
+    fn stx(&mut self, opcode: &OpCode) {
+        let address = self.get_operand_address(&opcode.mode);
+        self.mem_write(address, self.register_x);
+        self.program_counter += (opcode.len - 1) as u16;
+    }
+
+    fn sty(&mut self, opcode: &OpCode) {
+        let address = self.get_operand_address(&opcode.mode);
+        self.mem_write(address, self.register_y);
+        self.program_counter += (opcode.len - 1) as u16;
     }
 
     fn tax(&mut self) {
