@@ -64,9 +64,9 @@
 | RTI | ✅ | ✅ | IMP |
 | RTS | ✅ | ✅ | IMP |
 | SBC | ✅ | ✅ | IMM, ZP, ZP,X, ABS, ABS,X, ABS,Y, IND,X, IND,Y |
-| SEC | ❌ | ❌ |  |
-| SED | ❌ | ❌ |  |
-| SEI | ❌ | ❌ |  |
+| SEC | ✅ | ✅ | IMP |
+| SED | ✅ | ✅ | IMP |
+| SEI | ✅ | ✅ | IMP |
 | STA | ❌ | ❌ |  |
 | STX | ❌ | ❌ |  |
 | STY | ❌ | ❌ |  |

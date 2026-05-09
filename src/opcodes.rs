@@ -210,6 +210,11 @@ lazy_static! {
         table[0x40] = Some(OpCode::new(0x40, "RTI", 1, 6, AddressingMode::Implied));
         table[0x60] = Some(OpCode::new(0x60, "RTS", 1, 6, AddressingMode::Implied));
 
+        //set
+        table[0x38] = Some(OpCode::new(0x38, "SEC", 1, 2, AddressingMode::Implied));
+        table[0xF8] = Some(OpCode::new(0xF8, "SED", 1, 2, AddressingMode::Implied));
+        table[0x78] = Some(OpCode::new(0x78, "SEI", 1, 2, AddressingMode::Implied));
+
         //transfer
         table[0xAA] = Some(OpCode::new(0xAA, "TAX", 1, 2, AddressingMode::Implied));
 

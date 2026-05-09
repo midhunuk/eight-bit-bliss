@@ -7,5 +7,5 @@ mod compare;
 mod control;
 mod load;
 mod transfer;
-
+mod set;
 mod stack;

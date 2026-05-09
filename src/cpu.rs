@@ -170,6 +170,9 @@ impl Cpu {
                 0x40 => self.rti(),
                 0x60 => self.rts(),
                 0xE9 | 0xE5 | 0xF5 | 0xED | 0xFD | 0xF9 | 0xE1 | 0xF1 => self.sbc(opcode),
+                0x38 => self.sec(),
+                0xF8 => self.sed(),
+                0x78 => self.sei(),
                 0xAA => self.tax(),
                 0x00 => return,
                 _ => todo!(),
@@ -716,6 +719,18 @@ impl Cpu {
         self.update_zero_and_negative_flags(self.register_a);
 
         self.program_counter += (opcode.len - 1) as u16;
+    }
+
+    fn sec(&mut self) {
+        self.status.insert(CpuFlags::CARRY);
+    }
+
+    fn sed(&mut self) {
+        self.status.insert(CpuFlags::DECIMAL_MODE);
+    }
+
+    fn sei(&mut self) {
+        self.status.insert(CpuFlags::INTERRUPT_DISABLE);
     }
 
     fn tax(&mut self) {
