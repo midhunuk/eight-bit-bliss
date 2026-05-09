@@ -37,6 +37,7 @@ pub struct Cpu {
 
 const STACK: u16 = 0x0100;
 const STACK_RESET: u8 = 0xfd;
+const PROGRAM_START_POINTER: usize = 0x0600;
 
 impl Default for Cpu {
     fn default() -> Self {
@@ -99,8 +100,8 @@ impl Cpu {
 
     pub fn load(&mut self, program: Vec<u8>) {
         validate_program(&program);
-        self.memory[0x8000..(0x8000 + program.len())].copy_from_slice(&program[..]);
-        self.mem_write_u16(0xFFFC, 0x8000);
+        self.memory[PROGRAM_START_POINTER..(PROGRAM_START_POINTER + program.len())].copy_from_slice(&program[..]);
+        self.mem_write_u16(0xFFFC, PROGRAM_START_POINTER as u16);
     }
 
     pub fn reset(&mut self) {
@@ -114,7 +115,15 @@ impl Cpu {
     }
 
     pub fn run(&mut self) {
+        self.run_with_callback(|_| {});
+    }
+
+    pub fn run_with_callback<F>(&mut self, mut callback: F)
+    where
+        F: FnMut(&mut Cpu),
+    {
         loop {
+            callback(self);
             let code = self.mem_read(self.program_counter);
             self.program_counter += 1;
 
@@ -839,10 +848,10 @@ fn validate_program(program: &[u8]) {
     if program_length == 0 {
         panic!("program is empty")
     }
-    let last_byte = program[program_length - 1];
-    if last_byte != 0x00 {
-        panic!("program should end with 0x00")
-    }
+    // let last_byte = program[program_length - 1];
+    // if last_byte != 0x00 {
+    //     panic!("program should end with 0x00")
+    // }
 }
 
 #[cfg(test)]
