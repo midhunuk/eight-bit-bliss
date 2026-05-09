@@ -93,3 +93,46 @@ mod nop{
         assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 2);
     }
 }
+
+mod rts {
+    use crate::cpu::tests::common::*;
+
+    #[test]
+    fn rts_returns_from_subroutine() {
+        let mut cpu = set_up_cpu();
+        // Program: JSR $8006, LDA #$11, BRK, RTS, BRK
+        // $8000: 20 06 80 -> JSR $8006
+        // $8003: A9 11    -> LDA #$11
+        // $8005: 00       -> BRK
+        // $8006: 60       -> RTS
+        cpu.load_and_run(vec![
+            0x20, 0x06, 0x80, 0xA9, 0x11, 0x00, 0x60, 0x00
+        ]);
+
+        assert_eq!(cpu.register_a, 0x11);
+        assert_eq!(cpu.program_counter, PROGRAM_START_VALUE + 6);
+    }
+}
+
+mod rti {
+    use crate::cpu::tests::common::*;
+    use crate::cpu::*;
+
+    #[test]
+    fn rti_restores_status_and_pc() {
+        let mut cpu = set_up_cpu();
+        let return_pc: u16 = 0x1234;
+        cpu.mem_write(return_pc, 0x00); // Write BRK at target
+
+        cpu.load_and_reset(vec![0x40, 0x00]); // RTI
+        cpu.stack_push_u16(return_pc);
+        // Push status with Negative, Overflow, and Carry set
+        cpu.stack_push(0b1100_0001); 
+        cpu.run();
+
+        assert_eq!(cpu.program_counter, return_pc + 1);
+        assert!(cpu.status.contains(CpuFlags::NEGATIVE));
+        assert!(cpu.status.contains(CpuFlags::OVERFLOW));
+        assert!(cpu.status.contains(CpuFlags::CARRY));
+    }
+}

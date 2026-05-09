@@ -61,8 +61,8 @@
 | PLP | ✅ | ✅ | IMP |
 | ROL | ✅ | ✅ | ACC, ZP, ZP,X, ABS, ABS,X |
 | ROR | ✅ | ✅ | ACC, ZP, ZP,X, ABS, ABS,X |
-| RTI | ❌ | ❌ |  |
-| RTS | ❌ | ❌ |  |
+| RTI | ✅ | ✅ | IMP |
+| RTS | ✅ | ✅ | IMP |
 | SBC | ❌ | ❌ |  |
 | SEC | ❌ | ❌ |  |
 | SED | ❌ | ❌ |  |

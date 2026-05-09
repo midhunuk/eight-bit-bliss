@@ -167,6 +167,8 @@ impl Cpu {
                 0x26 | 0x36 | 0x2E | 0x3E => self.rol(opcode),
                 0x6A => self.ror_accumalator(),
                 0x66 | 0x76 | 0x6E | 0x7E => self.ror(opcode),
+                0x40 => self.rti(),
+                0x60 => self.rts(),
                 0xAA => self.tax(),
                 0x00 => return,
                 _ => todo!(),
@@ -238,11 +240,11 @@ impl Cpu {
         self.stack_push(lo);
     }
 
-    // fn stack_pop_u16(&mut self) -> u16 {
-    //     let lo = self.stack_pop() as u16;
-    //     let hi = self.stack_pop() as u16;
-    //     (hi << 8) | lo
-    // }
+    fn stack_pop_u16(&mut self) -> u16 {
+        let lo = self.stack_pop() as u16;
+        let hi = self.stack_pop() as u16;
+        (hi << 8) | lo
+    }
 
     fn stack_pop(&mut self) -> u8 {
         self.stack_pointer = self.stack_pointer.wrapping_add(1);
@@ -675,6 +677,16 @@ impl Cpu {
         self.update_zero_and_negative_flags(result);
 
         self.program_counter += (opcode.len - 1) as u16;
+    }
+
+    fn rti(&mut self){
+        let status = self.stack_pop();
+        self.status = CpuFlags::from_bits_truncate(status);
+        self.program_counter = self.stack_pop_u16();
+    }
+
+    fn rts(&mut self){
+        self.program_counter = self.stack_pop_u16() + 1;
     }
 
     fn tax(&mut self) {
