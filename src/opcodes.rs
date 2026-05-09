@@ -114,6 +114,18 @@ lazy_static! {
         table[0x01] = Some(OpCode::new(0x01, "ORA", 2, 6, AddressingMode::Indirect_X));
         table[0x11] = Some(OpCode::new(0x11, "ORA", 2, 5 + 1, AddressingMode::Indirect_Y));
 
+        table[0x2A] = Some(OpCode::new(0x2A, "ROL", 1, 2, AddressingMode::Accumulator));
+        table[0x26] = Some(OpCode::new(0x26, "ROL", 2, 5, AddressingMode::ZeroPage));
+        table[0x36] = Some(OpCode::new(0x36, "ROL", 2, 6, AddressingMode::ZeroPage_X));
+        table[0x2E] = Some(OpCode::new(0x2E, "ROL", 3, 6, AddressingMode::Absolute));
+        table[0x3E] = Some(OpCode::new(0x3E, "ROL", 3, 7, AddressingMode::Absolute_X));
+
+        table[0x6A] = Some(OpCode::new(0x6A, "ROR", 1, 2, AddressingMode::Accumulator));
+        table[0x66] = Some(OpCode::new(0x66, "ROR", 2, 5, AddressingMode::ZeroPage));
+        table[0x76] = Some(OpCode::new(0x76, "ROR", 2, 6, AddressingMode::ZeroPage_X));
+        table[0x6E] = Some(OpCode::new(0x6E, "ROR", 3, 6, AddressingMode::Absolute));
+        table[0x7E] = Some(OpCode::new(0x7E, "ROR", 3, 7, AddressingMode::Absolute_X));
+
         //branch
         table[0x90] = Some(OpCode::new(0x90, "BCC", 2, 2 + 1 + 2, AddressingMode::Relative));
         table[0xB0] = Some(OpCode::new(0xB0, "BCS", 2, 2 + 1 + 2, AddressingMode::Relative));

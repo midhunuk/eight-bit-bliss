@@ -59,8 +59,8 @@
 | PHP | ✅ | ✅ | IMP |
 | PLA | ✅ | ✅ | IMP |
 | PLP | ✅ | ✅ | IMP |
-| ROL | ❌ | ❌ |  |
-| ROR | ❌ | ❌ |  |
+| ROL | ✅ | ✅ | ACC, ZP, ZP,X, ABS, ABS,X |
+| ROR | ✅ | ✅ | ACC, ZP, ZP,X, ABS, ABS,X |
 | RTI | ❌ | ❌ |  |
 | RTS | ❌ | ❌ |  |
 | SBC | ❌ | ❌ |  |

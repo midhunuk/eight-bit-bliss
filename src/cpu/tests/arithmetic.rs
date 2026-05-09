@@ -1143,3 +1143,162 @@ mod ora {
         assert_eq!(cpu.register_a, 0xEE);
     }
 }
+
+mod rol{
+    use crate::cpu::tests::common::*;
+    use crate::cpu::*;
+
+    #[test]
+    fn rol_accumulator_with_carry() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_reset(vec![0x2A, 0x00]);
+        cpu.register_a = 0b0000_0001;
+        cpu.status.insert(CpuFlags::CARRY);
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0b0000_0011);
+        assert!(!cpu.status.contains(CpuFlags::CARRY));
+    }
+
+    #[test]
+    fn rol_accumulator_sets_carry() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_reset(vec![0x2A, 0x00]);
+        cpu.register_a = 0b1000_0000;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0b0000_0000);
+        assert!(cpu.status.contains(CpuFlags::CARRY));
+        assert!(cpu.status.contains(CpuFlags::ZERO));
+    }
+
+    #[test]
+    fn rol_zeropage() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x10, 0b0100_0000);
+        cpu.load_and_reset(vec![0x26, 0x10, 0x00]);
+        cpu.status.insert(CpuFlags::CARRY);
+        cpu.run();
+
+        assert_eq!(cpu.mem_read(0x10), 0b1000_0001);
+        assert!(!cpu.status.contains(CpuFlags::CARRY));
+        assert!(cpu.status.contains(CpuFlags::NEGATIVE));
+    }
+
+    #[test]
+    fn rol_zeropage_x() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x10 + 0x05, 0b0100_0000);
+        cpu.load_and_reset(vec![0x36, 0x10, 0x00]);
+        cpu.register_x = 0x05;
+        cpu.status.insert(CpuFlags::CARRY);
+        cpu.run();
+
+        assert_eq!(cpu.mem_read(0x15), 0b1000_0001);
+    }
+
+    #[test]
+    fn rol_absolute() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234, 0b0100_0000);
+        cpu.load_and_reset(vec![0x2E, 0x34, 0x12, 0x00]);
+        cpu.status.insert(CpuFlags::CARRY);
+        cpu.run();
+
+        assert_eq!(cpu.mem_read(0x1234), 0b1000_0001);
+    }
+
+    #[test]
+    fn rol_absolute_x() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234 + 0x05, 0b0100_0000);
+        cpu.load_and_reset(vec![0x3E, 0x34, 0x12, 0x00]);
+        cpu.register_x = 0x05;
+        cpu.status.insert(CpuFlags::CARRY);
+        cpu.run();
+
+        assert_eq!(cpu.mem_read(0x1239), 0b1000_0001);
+    }
+}
+
+mod ror{
+    use crate::cpu::tests::common::*;
+    use crate::cpu::*;
+
+    #[test]
+    fn ror_accumulator_with_carry() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_reset(vec![0x6A, 0x00]);
+        cpu.register_a = 0b0000_0010;
+        cpu.status.insert(CpuFlags::CARRY);
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0b1000_0001);
+        assert!(!cpu.status.contains(CpuFlags::CARRY));
+    }
+
+    #[test]
+    fn ror_accumulator_sets_carry() {
+        let mut cpu = set_up_cpu();
+        cpu.load_and_reset(vec![0x6A, 0x00]);
+        cpu.register_a = 0b0000_0001;
+
+        cpu.run();
+
+        assert_eq!(cpu.register_a, 0b0000_0000);
+        assert!(cpu.status.contains(CpuFlags::CARRY));
+        assert!(cpu.status.contains(CpuFlags::ZERO));
+    }
+
+    #[test]
+    fn ror_zeropage() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x10, 0b0000_0010);
+        cpu.load_and_reset(vec![0x66, 0x10, 0x00]);
+        cpu.status.insert(CpuFlags::CARRY);
+        cpu.run();
+
+        assert_eq!(cpu.mem_read(0x10), 0b1000_0001);
+        assert!(!cpu.status.contains(CpuFlags::CARRY));
+        assert!(cpu.status.contains(CpuFlags::NEGATIVE));
+    }
+
+    #[test]
+    fn ror_zeropage_x() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x10 + 0x05, 0b0000_0010);
+        cpu.load_and_reset(vec![0x76, 0x10, 0x00]);
+        cpu.register_x = 0x05;
+        cpu.status.insert(CpuFlags::CARRY);
+        cpu.run();
+
+        assert_eq!(cpu.mem_read(0x15), 0b1000_0001);
+    }
+
+    #[test]
+    fn ror_absolute() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234, 0b0000_0010);
+        cpu.load_and_reset(vec![0x6E, 0x34, 0x12, 0x00]);
+        cpu.status.insert(CpuFlags::CARRY);
+        cpu.run();
+
+        assert_eq!(cpu.mem_read(0x1234), 0b1000_0001);
+    }
+
+    #[test]
+    fn ror_absolute_x() {
+        let mut cpu = set_up_cpu();
+        cpu.mem_write(0x1234 + 0x05, 0b0000_0010);
+        cpu.load_and_reset(vec![0x7E, 0x34, 0x12, 0x00]);
+        cpu.register_x = 0x05;
+        cpu.status.insert(CpuFlags::CARRY);
+        cpu.run();
+
+        assert_eq!(cpu.mem_read(0x1239), 0b1000_0001);
+    }
+}
+

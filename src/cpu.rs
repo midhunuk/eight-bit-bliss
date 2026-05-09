@@ -163,6 +163,10 @@ impl Cpu {
                 0x08 => self.php(),
                 0x68 => self.pla(),
                 0x28 => self.plp(),
+                0x2A => self.rol_accumalator(),
+                0x26 | 0x36 | 0x2E | 0x3E => self.rol(opcode),
+                0x6A => self.ror_accumalator(),
+                0x66 | 0x76 | 0x6E | 0x7E => self.ror(opcode),
                 0xAA => self.tax(),
                 0x00 => return,
                 _ => todo!(),
@@ -595,6 +599,82 @@ impl Cpu {
     fn plp(&mut self) {
         let status = self.stack_pop();
         self.status = CpuFlags::from_bits_truncate(status);
+    }
+
+    fn rol_accumalator(&mut self) {
+        let value = self.register_a;
+        let old_carry = self.status.contains(CpuFlags::CARRY);
+
+        if value >> 7 == 1 {
+            self.set_carry_flag();
+        } else {
+            self.clear_carry_flag();
+        }
+        let mut result = value << 1;
+        if old_carry {
+            result |= 0b0000_0001;
+        }
+        self.register_a = result;
+        self.update_zero_and_negative_flags(result);
+    }
+
+    fn rol(&mut self, opcode: &OpCode) {
+        let address = self.get_operand_address(&opcode.mode);
+        let value = self.mem_read(address);
+
+        let old_carry = self.status.contains(CpuFlags::CARRY);
+
+        if value >> 7 == 1 {
+            self.set_carry_flag();
+        } else {
+            self.clear_carry_flag();
+        }
+        let mut result = value << 1;
+        if old_carry {
+            result |= 0b0000_0001;
+        }
+        self.mem_write(address, result);
+
+        self.update_zero_and_negative_flags(result);
+
+        self.program_counter += (opcode.len - 1) as u16;
+    }
+
+    fn ror_accumalator(&mut self) {
+        let value = self.register_a;
+        let old_carry = self.status.contains(CpuFlags::CARRY);
+
+        if value & 0x01 == 1 {
+            self.set_carry_flag();
+        } else {
+            self.clear_carry_flag();
+        }
+        let mut result = value >> 1;
+        if old_carry {
+            result |= 0b1000_0000;
+        }
+        self.register_a = result;
+        self.update_zero_and_negative_flags(result);
+    }
+
+    fn ror(&mut self, opcode: &OpCode) {
+        let address = self.get_operand_address(&opcode.mode);
+        let value = self.mem_read(address);
+        let old_carry = self.status.contains(CpuFlags::CARRY);
+
+        if value & 0x01 == 1 {
+            self.set_carry_flag();
+        } else {
+            self.clear_carry_flag();
+        }
+        let mut result = value >> 1;
+        if old_carry {
+            result |= 0b1000_0000;
+        }
+        self.mem_write(address, result);
+        self.update_zero_and_negative_flags(result);
+
+        self.program_counter += (opcode.len - 1) as u16;
     }
 
     fn tax(&mut self) {
